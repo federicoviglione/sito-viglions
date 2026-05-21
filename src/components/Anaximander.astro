@@ -1,0 +1,37 @@
+---
+// Anaximander — mini Asteroids easter-egg, vector-clean editorial style.
+// Activated by dispatching a 'anaximander:start' CustomEvent on `document`.
+---
+
+<div class="anaximander" data-state="idle" aria-hidden="true">
+  <canvas class="anaximander-canvas"></canvas>
+</div>
+
+<style>
+  .anaximander {
+    display: none;
+    position: relative;
+    margin-block: var(--space-5);
+  }
+  .anaximander[data-state="active"] {
+    display: block;
+  }
+  .anaximander-canvas {
+    display: block;
+    width: min(100%, 720px);
+    aspect-ratio: 16 / 10;
+    background: var(--ink);
+    border: 1px solid var(--rule);
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLDivElement>('.anaximander');
+  if (root) {
+    document.addEventListener('anaximander:start', () => {
+      root.setAttribute('data-state', 'active');
+      root.setAttribute('aria-hidden', 'false');
+      console.log('[anaximander] start');
+    });
+  }
+</script>

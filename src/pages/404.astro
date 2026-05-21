@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Anaximander from '../components/Anaximander.astro';
 import { getEntry } from 'astro:content';
 
 const site = await getEntry('site', 'info');
@@ -12,6 +13,10 @@ const siteName = site?.data.name ?? 'Federico Viglione';
     <h1 class="code">404</h1>
     <p class="message">The page you were looking for does not exist.</p>
     <p class="back"><a href="/">Back to home</a></p>
+    <p class="wander">
+      <button type="button" class="wander-btn" id="wander-btn">or wander the cosmos →</button>
+    </p>
+    <Anaximander />
   </main>
 </Layout>
 
@@ -54,4 +59,33 @@ const siteName = site?.data.name ?? 'Federico Viglione';
     color: var(--accent);
     border-color: var(--accent);
   }
+  .wander {
+    margin-top: var(--space-3);
+  }
+  .wander-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    border-bottom: 1px dotted var(--rule);
+    transition: color 150ms ease, border-color 150ms ease;
+  }
+  .wander-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .wander-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
 </style>
+
+<script>
+  const btn = document.getElementById('wander-btn');
+  btn?.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent('anaximander:start'));
+  });
+</script>
