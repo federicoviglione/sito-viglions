@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+
+const entries = await getCollection('research');
+const sorted = entries.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+
+const rendered = await Promise.all(
+  sorted.map(async (e) => {
+    const { Content } = await render(e);
+    return { data: e.data, Content };
+  })
+);
+---
+{sorted.length > 0 && (
+  <section id="research" class="research container">
+    <header class="section-head">
+      <div class="label">Research</div>
+      <h2 class="section-title">Areas of work</h2>
+    </header>
+    <div class="cards">
+      {rendered.map(({ data, Content }) => (
+        <article class="research-card">
+          <h3 class="card-title">{data.title}</h3>
+          <p class="card-summary">{data.summary}</p>
+          <details class="card-detail">
+            <summary>Read more</summary>
+            <div class="prose"><Content /></div>
+          </details>
+        </article>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .research { padding-block: var(--space-7); }
+  .section-head { margin-bottom: var(--space-4); }
+  .section-head .label { margin-bottom: var(--space-2); }
+  .research-card { padding-block: var(--space-5); border-top: 1px solid var(--rule); }
+  .research-card:last-child { border-bottom: 1px solid var(--rule); }
+  .card-title { font-family: var(--font-display); font-size: var(--fs-lg); font-weight: 500; margin-bottom: var(--space-2); }
+  .card-summary { font-size: var(--fs-sm); line-height: 1.6; max-width: var(--max-prose); }
+  .card-detail { margin-top: var(--space-3); font-size: var(--fs-sm); }
+  .card-detail summary { color: var(--accent); cursor: pointer; font-size: var(--fs-xs); }
+  .card-detail .prose { margin-top: var(--space-3); line-height: 1.6; }
+  .prose :global(p) { margin-bottom: var(--space-3); }
+</style>
