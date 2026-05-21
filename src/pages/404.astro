@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Anaximander from '../components/Anaximander.astro';
 import { getEntry } from 'astro:content';
 
 const site = await getEntry('site', 'info');
@@ -12,6 +13,7 @@ const siteName = site?.data.name ?? 'Federico Viglione';
     <h1 class="code">404</h1>
     <p class="message">The page you were looking for does not exist.</p>
     <p class="back"><a href="/">Back to home</a></p>
+    <Anaximander />
   </main>
 </Layout>
 

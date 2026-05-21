@@ -1,0 +1,1051 @@
+---
+// Anaximander — mini Asteroids easter-egg, vector-clean editorial style.
+// Always running once the 404 page is mounted; aria-hidden for AT users.
+---
+
+<div class="anaximander" aria-hidden="true">
+  <div class="anaximander-stage">
+    <canvas class="anaximander-canvas" width="720" height="450"></canvas>
+    <div class="anaximander-hud" aria-live="off">
+      <span class="hud-label">velocity</span>
+      <span class="hud-velocity" data-velocity>0.000c</span>
+      <span class="hud-label">wave</span>
+      <span class="hud-wave" data-wave>1</span>
+    </div>
+    <div class="anaximander-overlay" data-overlay hidden>
+      <p class="overlay-title">Drift over.</p>
+      <div class="overlay-stats">
+        <div class="stat">
+          <span class="stat-label">Max speed</span>
+          <span class="stat-value" data-overlay-topspeed>0.000c</span>
+          <span class="stat-detail" data-overlay-topspeed-kmh>0 km/h</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Distance travelled</span>
+          <span class="stat-value" data-overlay-distance>0 km</span>
+        </div>
+      </div>
+      <p class="overlay-reference" data-overlay-reference></p>
+      <p class="overlay-best" data-overlay-best></p>
+      <div class="overlay-actions">
+        <button type="button" data-action="restart">Restart</button>
+      </div>
+    </div>
+    <div class="anaximander-touch" data-touch hidden>
+      <div class="touch-left">
+        <button type="button" class="touch-btn touch-btn--fire" data-touch-action="fire" aria-label="Fire">●</button>
+      </div>
+      <div class="touch-right">
+        <div class="touch-joystick" data-joystick>
+          <div class="joystick-knob" data-joystick-knob></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .anaximander {
+    display: block;
+    position: relative;
+    margin-block: var(--space-5);
+  }
+  .anaximander-canvas {
+    display: block;
+    width: min(100%, 720px);
+    aspect-ratio: 16 / 10;
+    background: var(--ink);
+    border: 1px solid var(--rule);
+    touch-action: none;
+  }
+  .anaximander-stage {
+    position: relative;
+    width: min(100%, 720px);
+  }
+  .anaximander-stage .anaximander-canvas {
+    width: 100%;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    .anaximander-canvas {
+      aspect-ratio: 3 / 4;
+      width: min(100%, 480px);
+    }
+    .anaximander-stage {
+      width: 100%;
+    }
+  }
+  .anaximander-hud {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    pointer-events: none;
+    mix-blend-mode: difference;
+  }
+  .hud-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+  }
+  .hud-velocity, .hud-wave {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .anaximander-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    background: rgba(21, 23, 26, 0.78);
+    color: var(--paper);
+    text-align: center;
+    padding: var(--space-5);
+  }
+  .anaximander-overlay[hidden] { display: none; }
+  .overlay-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .overlay-stats {
+    display: flex;
+    gap: var(--space-7);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .stat-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.6;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .stat-detail {
+    font-size: var(--fs-sm);
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+  }
+  .overlay-reference {
+    font-size: var(--fs-sm);
+    max-width: 52ch;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+  /* The <a> is created dynamically by JS, so it doesn't carry Astro's scope
+     attribute. Use :global() to reach it. */
+  .overlay-reference :global(a) {
+    color: var(--paper);
+    border-bottom: 1px dotted rgba(246, 246, 244, 0.4);
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+  .overlay-reference :global(a:hover) {
+    color: var(--paper);
+    border-bottom-color: var(--paper);
+  }
+  .overlay-best {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.55;
+    min-height: 1em;
+  }
+  .overlay-actions { display: flex; gap: var(--space-3); }
+  .overlay-actions button {
+    font: inherit;
+    font-size: var(--fs-sm);
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--paper);
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .overlay-actions button:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .overlay-actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .anaximander-touch {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .anaximander-touch[hidden] { display: none; }
+  .anaximander-touch .touch-left,
+  .anaximander-touch .touch-right {
+    position: absolute;
+    display: flex;
+    gap: var(--space-3);
+    pointer-events: auto;
+  }
+  .anaximander-touch .touch-left {
+    left: var(--space-3);
+    bottom: var(--space-3);
+  }
+  .anaximander-touch .touch-right {
+    right: var(--space-3);
+    bottom: var(--space-3);
+    align-items: flex-end;
+  }
+  .touch-btn {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--paper);
+    background: rgba(21, 23, 26, 0.45);
+    color: var(--paper);
+    font-size: 28px;
+    font-family: var(--font-body);
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 100ms ease;
+  }
+  .touch-btn:active,
+  .touch-btn[data-active="1"] {
+    background: rgba(246, 246, 244, 0.25);
+  }
+  .touch-btn--fire {
+    width: 88px;
+    height: 88px;
+    font-size: 42px;
+  }
+  .touch-joystick {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border: 1px solid var(--paper);
+    background: rgba(21, 23, 26, 0.45);
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .joystick-knob {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--paper);
+    background: rgba(246, 246, 244, 0.35);
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: transform 80ms ease-out;
+  }
+  .touch-joystick[data-active="1"] .joystick-knob {
+    background: rgba(246, 246, 244, 0.55);
+    transition: none;
+  }
+  /* Visibility is controlled in JS by toggling [hidden]; CSS only styles. */
+</style>
+
+<script>
+  const root = document.querySelector<HTMLDivElement>('.anaximander');
+  const canvas = document.querySelector<HTMLCanvasElement>('.anaximander-canvas');
+  if (!root || !canvas) {
+    // No-op: canvas non disponibile o componente non montato.
+  } else {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.warn('[anaximander] canvas 2d context not available');
+    } else {
+      // -------- Game state --------
+      type Ship = { x: number; y: number; vx: number; vy: number; angle: number; alive?: boolean };
+      let ship: Ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
+      let running = false;
+      let lastT = 0;
+      let rafId = 0;
+      let canvasW = 0;
+      let canvasH = 0;
+      let deathTimer = 0;
+      let gameOver = false;
+      const elOverlay = root.querySelector<HTMLElement>('[data-overlay]');
+      const elOverlayTopspeed = root.querySelector<HTMLElement>('[data-overlay-topspeed]');
+      const elOverlayTopspeedKmh = root.querySelector<HTMLElement>('[data-overlay-topspeed-kmh]');
+      const elOverlayDistance = root.querySelector<HTMLElement>('[data-overlay-distance]');
+      const elOverlayReference = root.querySelector<HTMLElement>('[data-overlay-reference]');
+      const elOverlayBest = root.querySelector<HTMLElement>('[data-overlay-best]');
+      const elRestart = root.querySelector<HTMLButtonElement>('[data-action="restart"]');
+      const elTouch = root.querySelector<HTMLElement>('[data-touch]');
+      const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
+
+      const touchHold: Record<string, Set<number>> = {
+        'fire': new Set(),
+      };
+
+      function touchActive(action: string): boolean {
+        return (touchHold[action]?.size ?? 0) > 0;
+      }
+
+      // Joystick state: vector in [-1, 1] for each axis. (0, 0) = centred / inactive.
+      let joystickX = 0;
+      let joystickY = 0;
+      let joystickPointer: number | null = null;
+      const elJoystick = root.querySelector<HTMLElement>('[data-joystick]');
+      const elJoystickKnob = root.querySelector<HTMLElement>('[data-joystick-knob]');
+
+      // -------- Utilities --------
+      function wrap(v: number, max: number): number {
+        if (v < 0) return v + max;
+        if (v >= max) return v - max;
+        return v;
+      }
+
+      // Dev-only micro-asserts (run once at module load in dev mode).
+      if (import.meta.env.DEV) {
+        console.assert(wrap(5, 10) === 5, 'wrap inside');
+        console.assert(wrap(-1, 10) === 9, 'wrap negative');
+        console.assert(wrap(11, 10) === 1, 'wrap over');
+      }
+
+      function circleHit(ax: number, ay: number, ar: number, bx: number, by: number, br: number): boolean {
+        const dx = ax - bx, dy = ay - by;
+        return dx * dx + dy * dy <= (ar + br) * (ar + br);
+      }
+
+      if (import.meta.env.DEV) {
+        console.assert(circleHit(0, 0, 5, 3, 0, 5) === true, 'circleHit overlap');
+        console.assert(circleHit(0, 0, 1, 100, 0, 1) === false, 'circleHit far');
+        console.assert(circleHit(0, 0, 1, 2, 0, 1) === true, 'circleHit touch');
+      }
+
+      const keys = new Set<string>();
+
+      type Bullet = { x: number; y: number; vx: number; vy: number; life: number };
+      const bullets: Bullet[] = [];
+      let fireCooldown = 0;
+      const BULLET_SPEED = 500; // px/sec
+      const BULLET_LIFE = 0.8;  // sec
+      const FIRE_COOLDOWN = 0.15; // sec
+
+      // Debris: line segments that drift away from the ship on death.
+      type Debris = {
+        x: number; y: number;
+        vx: number; vy: number;
+        angle: number; va: number;
+        p1x: number; p1y: number;
+        p2x: number; p2y: number;
+      };
+      const debris: Debris[] = [];
+
+      // Shards: short-lived line segments from broken rocks (purely visual).
+      type Shard = {
+        x: number; y: number;
+        vx: number; vy: number;
+        angle: number; va: number;
+        len: number;
+        life: number;
+        maxLife: number;
+      };
+      const shards: Shard[] = [];
+
+      type RockSize = 'L' | 'M' | 'S';
+      type Rock = {
+        x: number; y: number;
+        vx: number; vy: number;
+        angle: number; va: number; // angular vel
+        size: RockSize;
+        radius: number;
+        shape: number[]; // polygon offsets per vertex (relative to radius)
+      };
+      const rocks: Rock[] = [];
+      let wave = 1;
+
+      // -------- Velocity (relativistic display) --------
+      // C_PIXELS = THRUST * 1000 so that one second of thrust raises v by 0.001c.
+      const C_PIXELS = 200_000;
+      // Speed of light in km/s, used to convert pixel-space speeds to physical km.
+      const C_KM_PER_SEC = 299_792.458;
+      const KM_PER_PIXEL = C_KM_PER_SEC / C_PIXELS;
+      const MAXV_KEY = 'anaximander.maxv';
+      let maxV = 0;
+      let bestV = 0;
+      let distancePx = 0;
+      try { bestV = parseFloat(localStorage.getItem(MAXV_KEY) || '0') || 0; } catch {}
+
+      function formatC(v: number): string {
+        return (v / C_PIXELS).toFixed(3) + 'c';
+      }
+
+      function formatKmh(pxPerSec: number): string {
+        const kmh = pxPerSec * KM_PER_PIXEL * 3600;
+        return kmh.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' km/h';
+      }
+
+      function formatKm(km: number): string {
+        if (km < 1) return km.toFixed(2) + ' km';
+        if (km < 1e6) return km.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' km';
+        if (km < 1e9) return (km / 1e6).toFixed(2) + ' million km';
+        if (km < 1e12) return (km / 1e9).toFixed(2) + ' billion km';
+        if (km < 1e15) return (km / 1e12).toFixed(2) + ' trillion km';
+        // Scientific notation for cosmic distances (>= 1 quadrillion km).
+        const exp = km.toExponential(2);
+        const [mantissa, e] = exp.split('e');
+        return `${mantissa} × 10^${parseInt(e, 10)} km`;
+      }
+
+      // -------- Distance references --------
+      // Ordered ascending by km. Used to compare run distance against real-world scales.
+      type DistanceRef = { km: number; label: string; url: string };
+      const DISTANCE_REFERENCES: DistanceRef[] = [
+        { km: 42.195,                label: 'the length of a marathon',                                     url: 'https://en.wikipedia.org/wiki/Marathon' },
+        { km: 343,                   label: 'the distance from London to Paris',                            url: 'https://en.wikipedia.org/wiki/Eurostar' },
+        { km: 415,                   label: 'the long diagonal of Sicily',                                  url: 'https://en.wikipedia.org/wiki/Sicily' },
+        { km: 1_185,                 label: 'the length of Italy from north to south',                      url: 'https://en.wikipedia.org/wiki/Italy' },
+        { km: 3_860,                 label: 'the width of the Mediterranean Sea',                           url: 'https://en.wikipedia.org/wiki/Mediterranean_Sea' },
+        { km: 3_935,                 label: 'the distance from New York to Los Angeles',                    url: 'https://en.wikipedia.org/wiki/Los_Angeles' },
+        { km: 4_506,                 label: 'the width of the contiguous United States',                    url: 'https://en.wikipedia.org/wiki/Contiguous_United_States' },
+        { km: 6_888,                 label: 'the distance from Rome to New York',                           url: 'https://en.wikipedia.org/wiki/New_York_City' },
+        { km: 9_560,                 label: 'the distance from London to Tokyo',                            url: 'https://en.wikipedia.org/wiki/Tokyo' },
+        { km: 12_742,                label: "Earth's mean diameter",                                        url: 'https://en.wikipedia.org/wiki/Earth_radius' },
+        { km: 35_786,                label: 'the altitude of geostationary orbit',                          url: 'https://en.wikipedia.org/wiki/Geostationary_orbit' },
+        { km: 40_075,                label: "Earth's equatorial circumference",                             url: 'https://en.wikipedia.org/wiki/Earth%27s_circumference' },
+        { km: 299_792,               label: 'one light-second',                                             url: 'https://en.wikipedia.org/wiki/Light-second' },
+        { km: 384_400,               label: 'the distance from Earth to the Moon',                          url: 'https://en.wikipedia.org/wiki/Lunar_distance' },
+        { km: 1_391_400,             label: "the Sun's diameter",                                           url: 'https://en.wikipedia.org/wiki/Sun' },
+        { km: 38_000_000,            label: "the closest approach of Venus to Earth",                       url: 'https://en.wikipedia.org/wiki/Venus' },
+        { km: 54_600_000,            label: "the closest approach of Mars to Earth",                        url: 'https://en.wikipedia.org/wiki/Mars' },
+        { km: 77_300_000,            label: "the closest approach of Mercury to Earth",                     url: 'https://en.wikipedia.org/wiki/Mercury_(planet)' },
+        { km: 149_597_871,           label: 'one astronomical unit (Earth to Sun)',                         url: 'https://en.wikipedia.org/wiki/Astronomical_unit' },
+        { km: 778_547_200,           label: 'the distance from the Sun to Jupiter',                         url: 'https://en.wikipedia.org/wiki/Jupiter' },
+        { km: 1_434_000_000,         label: 'the distance from the Sun to Saturn',                          url: 'https://en.wikipedia.org/wiki/Saturn' },
+        { km: 2_872_000_000,         label: 'the distance from the Sun to Uranus',                          url: 'https://en.wikipedia.org/wiki/Uranus' },
+        { km: 4_495_000_000,         label: 'the distance from the Sun to Neptune',                         url: 'https://en.wikipedia.org/wiki/Neptune' },
+        { km: 5_906_400_000,         label: "the Sun-Pluto mean distance",                                  url: 'https://en.wikipedia.org/wiki/Pluto' },
+        { km: 18_000_000_000,        label: 'the heliopause, where the solar wind meets interstellar space', url: 'https://en.wikipedia.org/wiki/Heliopause' },
+        { km: 24_500_000_000,        label: "Voyager 1's current distance from Earth",                      url: 'https://en.wikipedia.org/wiki/Voyager_1' },
+        { km: 25_902_068_000,        label: 'one light-day',                                                url: 'https://en.wikipedia.org/wiki/Light-year' },
+        { km: 300_000_000_000,       label: 'the inner edge of the Oort cloud',                             url: 'https://en.wikipedia.org/wiki/Oort_cloud' },
+        { km: 9_460_730_472_580,     label: 'one light-year',                                               url: 'https://en.wikipedia.org/wiki/Light-year' },
+        { km: 4.0208e13,             label: 'the distance to Proxima Centauri, the closest star',           url: 'https://en.wikipedia.org/wiki/Proxima_Centauri' },
+        { km: 2.46e17,               label: 'the distance to the centre of the Milky Way',                  url: 'https://en.wikipedia.org/wiki/Galactic_Center' },
+        { km: 2.364e19,              label: 'the distance to the Andromeda Galaxy',                         url: 'https://en.wikipedia.org/wiki/Andromeda_Galaxy' },
+        { km: 8.8e23,                label: 'the radius of the observable universe',                        url: 'https://en.wikipedia.org/wiki/Observable_universe' },
+      ];
+
+      function findReference(distKm: number): DistanceRef | null {
+        for (let i = DISTANCE_REFERENCES.length - 1; i >= 0; i--) {
+          if (DISTANCE_REFERENCES[i].km <= distKm) return DISTANCE_REFERENCES[i];
+        }
+        return null;
+      }
+
+      const elVelocity = root.querySelector<HTMLElement>('[data-velocity]');
+      const elWave = root.querySelector<HTMLElement>('[data-wave]');
+
+      function syncHud() {
+        if (elVelocity) {
+          const speed = Math.hypot(ship.vx, ship.vy);
+          elVelocity.textContent = formatC(speed);
+        }
+        if (elWave) elWave.textContent = String(wave);
+      }
+
+      const ROCK_RADIUS: Record<RockSize, number> = { L: 38, M: 22, S: 12 };
+      const ROCK_SPEED: Record<RockSize, number> = { L: 35, M: 55, S: 80 };
+
+      function randRange(a: number, b: number) {
+        return a + Math.random() * (b - a);
+      }
+
+      function makeRockShape(): number[] {
+        const verts = 10;
+        const out: number[] = [];
+        for (let i = 0; i < verts; i++) {
+          out.push(0.78 + Math.random() * 0.37);
+        }
+        return out;
+      }
+
+      function makeRock(x: number, y: number, size: RockSize, speedMul = 1): Rock {
+        const dir = Math.random() * Math.PI * 2;
+        const sp = ROCK_SPEED[size] * speedMul;
+        return {
+          x, y,
+          vx: Math.cos(dir) * sp,
+          vy: Math.sin(dir) * sp,
+          angle: Math.random() * Math.PI * 2,
+          va: randRange(-1.2, 1.2),
+          size,
+          radius: ROCK_RADIUS[size],
+          shape: makeRockShape(),
+        };
+      }
+
+      function splitRock(r: Rock): Rock[] {
+        if (r.size === 'L') return [makeRock(r.x, r.y, 'M'), makeRock(r.x, r.y, 'M')];
+        if (r.size === 'M') return [makeRock(r.x, r.y, 'S'), makeRock(r.x, r.y, 'S')];
+        return [];
+      }
+
+      function spawnShards(r: Rock) {
+        // More shards from bigger rocks. Pure visual; no collision interaction.
+        const count = r.size === 'L' ? 6 : r.size === 'M' ? 4 : 3;
+        const baseLen = r.radius * 0.3;
+        for (let i = 0; i < count; i++) {
+          const dir = Math.random() * Math.PI * 2;
+          const speed = 40 + Math.random() * 80;
+          const lifeS = 0.5 + Math.random() * 0.5;
+          shards.push({
+            x: r.x,
+            y: r.y,
+            vx: Math.cos(dir) * speed,
+            vy: Math.sin(dir) * speed,
+            angle: Math.random() * Math.PI * 2,
+            va: (Math.random() - 0.5) * 8,
+            len: baseLen * (0.7 + Math.random() * 0.6),
+            life: lifeS,
+            maxLife: lifeS,
+          });
+        }
+      }
+
+      function drawShards() {
+        if (shards.length === 0) return;
+        ctx.lineWidth = 1;
+        for (const s of shards) {
+          const alpha = (s.life / s.maxLife) * 0.8;
+          ctx.strokeStyle = `rgba(246, 246, 244, ${alpha})`;
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.rotate(s.angle);
+          ctx.beginPath();
+          ctx.moveTo(-s.len / 2, 0);
+          ctx.lineTo(s.len / 2, 0);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function spawnWave(n: number, speedMul: number) {
+        rocks.length = 0;
+        for (let i = 0; i < n; i++) {
+          const onTop = Math.random() < 0.5;
+          const x = onTop
+            ? Math.random() * canvasW
+            : (Math.random() < 0.5 ? 0 : canvasW - 1);
+          const y = onTop
+            ? (Math.random() < 0.5 ? 0 : canvasH - 1)
+            : Math.random() * canvasH;
+          rocks.push(makeRock(x, y, 'L', speedMul));
+        }
+      }
+
+      function onKeyDown(e: KeyboardEvent) {
+        if (!running) return;
+        const k = e.key;
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) {
+          e.preventDefault();
+        }
+        keys.add(k);
+      }
+      function onKeyUp(e: KeyboardEvent) {
+        keys.delete(e.key);
+      }
+
+      // -------- Canvas sizing --------
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.floor(rect.width);
+        const h = Math.floor(rect.height);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        // If we had prior dimensions and they changed, rescale entities to preserve relative positions
+        if (canvasW > 0 && canvasH > 0 && (canvasW !== w || canvasH !== h)) {
+          const sx = w / canvasW;
+          const sy = h / canvasH;
+          ship.x *= sx; ship.y *= sy;
+          ship.vx *= sx; ship.vy *= sy;
+          for (const b of bullets) {
+            b.x *= sx; b.y *= sy;
+            b.vx *= sx; b.vy *= sy;
+          }
+          for (const r of rocks) {
+            r.x *= sx; r.y *= sy;
+            r.vx *= sx; r.vy *= sy;
+          }
+          for (const d of debris) {
+            d.x *= sx; d.y *= sy;
+            d.vx *= sx; d.vy *= sy;
+          }
+          for (const s of shards) {
+            s.x *= sx; s.y *= sy;
+            s.vx *= sx; s.vy *= sy;
+          }
+        } else if (!running) {
+          ship.x = w / 2;
+          ship.y = h / 2;
+        }
+
+        canvasW = w;
+        canvasH = h;
+      }
+
+      // -------- Drawing --------
+      // Ship outline vertices in local frame. Reused by drawShip and spawnDebris.
+      const SHIP_VERTS: Array<[number, number]> = [[12, 0], [-8, 7], [-5, 0], [-8, -7]];
+
+      function drawShip(s: Ship) {
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.angle);
+        // Dim the silhouette once the ship is dead, leaving it as a marker.
+        ctx.strokeStyle = s.alive === false ? 'rgba(246, 246, 244, 0.5)' : '#f6f6f4';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < SHIP_VERTS.length; i++) {
+          const [x, y] = SHIP_VERTS[i];
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function spawnDebris(s: Ship) {
+        // One debris piece per side of the ship outline. Debris stay close to
+        // the death spot — they don't inherit the ship's velocity, only a
+        // small outward push, so the wreck reads as a single event.
+        const PUSH = 25; // px/sec outward from the ship centre
+        const cosA = Math.cos(s.angle);
+        const sinA = Math.sin(s.angle);
+        for (let i = 0; i < SHIP_VERTS.length; i++) {
+          const [ax, ay] = SHIP_VERTS[i];
+          const [bx, by] = SHIP_VERTS[(i + 1) % SHIP_VERTS.length];
+          // Midpoint of the side in local frame.
+          const mx = (ax + bx) / 2;
+          const my = (ay + by) / 2;
+          // World position of the midpoint.
+          const wx = s.x + cosA * mx - sinA * my;
+          const wy = s.y + sinA * mx + cosA * my;
+          // Outward direction (away from ship origin) in world frame.
+          const outx = cosA * mx - sinA * my;
+          const outy = sinA * mx + cosA * my;
+          const outLen = Math.hypot(outx, outy) || 1;
+          debris.push({
+            x: wx, y: wy,
+            vx: (outx / outLen) * PUSH,
+            vy: (outy / outLen) * PUSH,
+            angle: s.angle,
+            va: (Math.random() - 0.5) * 4,
+            p1x: ax - mx, p1y: ay - my,
+            p2x: bx - mx, p2y: by - my,
+          });
+        }
+      }
+
+      function drawDebris() {
+        if (debris.length === 0) return;
+        ctx.strokeStyle = 'rgba(246, 246, 244, 0.85)';
+        ctx.lineWidth = 1.5;
+        for (const d of debris) {
+          ctx.save();
+          ctx.translate(d.x, d.y);
+          ctx.rotate(d.angle);
+          ctx.beginPath();
+          ctx.moveTo(d.p1x, d.p1y);
+          ctx.lineTo(d.p2x, d.p2y);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function clear() {
+        ctx.fillStyle = '#15171a';
+        ctx.fillRect(0, 0, canvasW, canvasH);
+      }
+
+      // -------- Physics constants --------
+      const ROT_SPEED = 3.5;     // rad/sec
+      const THRUST = 200;        // px/sec^2  (= 0.001c per second of thrust)
+      const RECOIL = 15;         // px/sec impulse per shot, opposite of fire direction
+
+      function update(dt: number) {
+        // Debris drift regardless of game state (until restart clears them).
+        for (const d of debris) {
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          d.angle += d.va * dt;
+        }
+        // Shards drift and fade; remove when life expires.
+        for (let i = shards.length - 1; i >= 0; i--) {
+          const s = shards[i];
+          s.life -= dt;
+          if (s.life <= 0) {
+            shards.splice(i, 1);
+            continue;
+          }
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          s.angle += s.va * dt;
+        }
+
+        if (ship.alive === false && !gameOver) {
+          deathTimer += dt;
+          if (deathTimer > 1.2) {
+            triggerGameOver();
+          }
+          return;
+        }
+        if (gameOver) return;
+
+        if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
+        if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
+
+        // Joystick steers AND accelerates: ship turns instantly to the joystick
+        // heading and thrusts along it with magnitude proportional to deflection.
+        const jMag = Math.hypot(joystickX, joystickY);
+        if (jMag > 0.15) {
+          ship.angle = Math.atan2(joystickY, joystickX);
+          ship.vx += Math.cos(ship.angle) * THRUST * jMag * dt;
+          ship.vy += Math.sin(ship.angle) * THRUST * jMag * dt;
+        } else if (keys.has('ArrowUp')) {
+          ship.vx += Math.cos(ship.angle) * THRUST * dt;
+          ship.vy += Math.sin(ship.angle) * THRUST * dt;
+        }
+        // Vacuum: no drag. Velocity persists until thrust or recoil changes it.
+        ship.x = wrap(ship.x + ship.vx * dt, canvasW);
+        ship.y = wrap(ship.y + ship.vy * dt, canvasH);
+
+        // Track max velocity reached this run, personal best, and accumulated distance.
+        const speedNow = Math.hypot(ship.vx, ship.vy);
+        if (speedNow > maxV) {
+          maxV = speedNow;
+          if (maxV > bestV) {
+            bestV = maxV;
+            try { localStorage.setItem(MAXV_KEY, String(bestV)); } catch {}
+          }
+        }
+        distancePx += speedNow * dt;
+
+        // Fire
+        fireCooldown = Math.max(0, fireCooldown - dt);
+        if ((keys.has(' ') || touchActive('fire')) && fireCooldown === 0) {
+          bullets.push({
+            x: ship.x + Math.cos(ship.angle) * 12,
+            y: ship.y + Math.sin(ship.angle) * 12,
+            vx: Math.cos(ship.angle) * BULLET_SPEED + ship.vx,
+            vy: Math.sin(ship.angle) * BULLET_SPEED + ship.vy,
+            life: BULLET_LIFE,
+          });
+          // Recoil: each shot pushes the ship backwards along its current heading.
+          ship.vx -= Math.cos(ship.angle) * RECOIL;
+          ship.vy -= Math.sin(ship.angle) * RECOIL;
+          fireCooldown = FIRE_COOLDOWN;
+        }
+
+        // Bullets update
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          b.life -= dt;
+          if (b.life <= 0) {
+            bullets.splice(i, 1);
+            continue;
+          }
+          b.x = wrap(b.x + b.vx * dt, canvasW);
+          b.y = wrap(b.y + b.vy * dt, canvasH);
+        }
+
+        // Rocks update
+        for (const r of rocks) {
+          r.x = wrap(r.x + r.vx * dt, canvasW);
+          r.y = wrap(r.y + r.vy * dt, canvasH);
+          r.angle += r.va * dt;
+        }
+
+        // Bullet -> Rock collisions
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          for (let j = rocks.length - 1; j >= 0; j--) {
+            const r = rocks[j];
+            if (circleHit(b.x, b.y, 2, r.x, r.y, r.radius)) {
+              bullets.splice(i, 1);
+              spawnShards(r);
+              const fragments = splitRock(r);
+              rocks.splice(j, 1, ...fragments);
+              break;
+            }
+          }
+        }
+
+        // Ship -> Rock collisions
+        if (ship.alive !== false) {
+          for (const r of rocks) {
+            if (circleHit(ship.x, ship.y, 6, r.x, r.y, r.radius)) {
+              ship.alive = false;
+              spawnDebris(ship);
+              break;
+            }
+          }
+        }
+
+        // Wave clear?
+        if (rocks.length === 0 && ship.alive !== false) {
+          wave += 1;
+          const speedMul = Math.min(1 + 0.05 * (wave - 1), 2);
+          spawnWave(2 + wave, speedMul);
+        }
+      }
+
+      function drawBullets() {
+        ctx.fillStyle = '#f6f6f4';
+        for (const b of bullets) {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      function drawRocks() {
+        ctx.strokeStyle = '#f6f6f4';
+        ctx.lineWidth = 1.25;
+        for (const r of rocks) {
+          ctx.save();
+          ctx.translate(r.x, r.y);
+          ctx.rotate(r.angle);
+          ctx.beginPath();
+          const verts = r.shape.length;
+          for (let i = 0; i < verts; i++) {
+            const a = (i / verts) * Math.PI * 2;
+            const rad = r.radius * r.shape[i];
+            const x = Math.cos(a) * rad;
+            const y = Math.sin(a) * rad;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      function frame(t: number) {
+        if (!running) return;
+        const dt = Math.min((t - lastT) / 1000, 0.05);
+        lastT = t;
+        update(dt);
+        syncHud();
+        clear();
+        drawBullets();
+        drawRocks();
+        drawShards();
+        drawDebris();
+        drawShip(ship);
+        if (!gameOver) {
+          rafId = requestAnimationFrame(frame);
+        }
+      }
+
+      function start() {
+        if (running) return;
+        ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
+        bullets.length = 0;
+        debris.length = 0;
+        shards.length = 0;
+        wave = 1;
+        maxV = 0;
+        distancePx = 0;
+        deathTimer = 0;
+        resize();
+        ship.x = canvasW / 2;
+        ship.y = canvasH / 2;
+        spawnWave(3, 1);
+        syncHud();
+        running = true;
+        if (elTouch && isTouchDevice) elTouch.hidden = false;
+        lastT = performance.now();
+        rafId = requestAnimationFrame(frame);
+      }
+
+      function triggerGameOver() {
+        gameOver = true;
+        if (!elOverlay) return;
+        elOverlay.hidden = false;
+
+        const distKm = distancePx * KM_PER_PIXEL;
+        if (elOverlayTopspeed) elOverlayTopspeed.textContent = formatC(maxV);
+        if (elOverlayTopspeedKmh) elOverlayTopspeedKmh.textContent = formatKmh(maxV);
+        if (elOverlayDistance) elOverlayDistance.textContent = formatKm(distKm);
+
+        if (elOverlayReference) {
+          const ref = findReference(distKm);
+          if (ref) {
+            const a = document.createElement('a');
+            a.href = ref.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = ref.label;
+            elOverlayReference.replaceChildren(
+              document.createTextNode('Farther than '),
+              a,
+              document.createTextNode(` (${formatKm(ref.km)}).`),
+            );
+          } else {
+            elOverlayReference.textContent = 'A short hop in the cosmos.';
+          }
+        }
+
+        if (elOverlayBest) {
+          elOverlayBest.textContent = bestV > 0 ? `personal best ${formatC(bestV)}` : '';
+        }
+
+        elRestart?.focus();
+      }
+
+      function resetJoystick() {
+        joystickX = 0;
+        joystickY = 0;
+        joystickPointer = null;
+        if (elJoystickKnob) elJoystickKnob.style.transform = 'translate(-50%, -50%)';
+        if (elJoystick) elJoystick.setAttribute('data-active', '0');
+      }
+
+      function clearInputState() {
+        keys.clear();
+        for (const set of Object.values(touchHold)) set.clear();
+        fireCooldown = 0;
+        resetJoystick();
+      }
+
+      function restart() {
+        clearInputState();
+        gameOver = false;
+        if (elOverlay) elOverlay.hidden = true;
+        ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
+        bullets.length = 0;
+        debris.length = 0;
+        shards.length = 0;
+        wave = 1;
+        maxV = 0;
+        distancePx = 0;
+        deathTimer = 0;
+        spawnWave(3, 1);
+        syncHud();
+        // Re-prime the loop in case rAF was not pending
+        if (running) {
+          lastT = performance.now();
+          rafId = requestAnimationFrame(frame);
+        }
+      }
+
+      // -------- Events --------
+      window.addEventListener('resize', () => {
+        if (running) resize();
+      });
+
+      window.addEventListener('orientationchange', () => {
+        if (running) setTimeout(resize, 50);
+      });
+
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+
+      elRestart?.addEventListener('click', restart);
+
+      const touchButtons = root.querySelectorAll<HTMLButtonElement>('.touch-btn');
+      touchButtons.forEach((btn) => {
+        const action = btn.dataset.touchAction;
+        if (!action) return;
+
+        const setVisualActive = (on: boolean) => {
+          btn.setAttribute('data-active', on ? '1' : '0');
+        };
+
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          btn.setPointerCapture(e.pointerId);
+          touchHold[action]?.add(e.pointerId);
+          setVisualActive(true);
+        });
+
+        const release = (e: PointerEvent) => {
+          touchHold[action]?.delete(e.pointerId);
+          if (!touchActive(action)) setVisualActive(false);
+        };
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointercancel', release);
+      });
+
+      // Joystick: drag the knob; release returns to centre.
+      if (elJoystick && elJoystickKnob) {
+        const j = elJoystick;
+        const knob = elJoystickKnob;
+
+        function updateKnob(clientX: number, clientY: number) {
+          const rect = j.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const maxR = rect.width / 2;
+          let dx = clientX - cx;
+          let dy = clientY - cy;
+          const len = Math.hypot(dx, dy);
+          if (len > maxR) {
+            dx = (dx / len) * maxR;
+            dy = (dy / len) * maxR;
+          }
+          joystickX = dx / maxR;
+          joystickY = dy / maxR;
+          knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        }
+
+        j.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          j.setPointerCapture(e.pointerId);
+          joystickPointer = e.pointerId;
+          j.setAttribute('data-active', '1');
+          updateKnob(e.clientX, e.clientY);
+        });
+        j.addEventListener('pointermove', (e) => {
+          if (e.pointerId !== joystickPointer) return;
+          updateKnob(e.clientX, e.clientY);
+        });
+        const releaseJ = (e: PointerEvent) => {
+          if (e.pointerId !== joystickPointer) return;
+          resetJoystick();
+        };
+        j.addEventListener('pointerup', releaseJ);
+        j.addEventListener('pointercancel', releaseJ);
+      }
+
+      // Auto-start: the game is always visible on /404, no click required.
+      start();
+    }
+  }
+</script>
