@@ -27,10 +27,93 @@
 
 <script>
   const root = document.querySelector<HTMLDivElement>('.anaximander');
-  if (root) {
-    document.addEventListener('anaximander:start', () => {
-      root.setAttribute('data-state', 'active');
-      root.removeAttribute('aria-hidden');
-    });
+  const canvas = document.querySelector<HTMLCanvasElement>('.anaximander-canvas');
+  if (!root || !canvas) {
+    // No-op: canvas non disponibile o componente non montato.
+  } else {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.warn('[anaximander] canvas 2d context not available');
+    } else {
+      // -------- Game state --------
+      type Ship = { x: number; y: number; vx: number; vy: number; angle: number };
+      let ship: Ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2 };
+      let running = false;
+      let lastT = 0;
+      let rafId = 0;
+
+      // -------- Canvas sizing --------
+      function resize() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const rect = canvas.getBoundingClientRect();
+        const w = Math.floor(rect.width);
+        const h = Math.floor(rect.height);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // Center ship if not started
+        if (!running) {
+          ship.x = w / 2;
+          ship.y = h / 2;
+        }
+      }
+
+      // -------- Drawing --------
+      function drawShip(s: Ship) {
+        ctx.save();
+        ctx.translate(s.x, s.y);
+        ctx.rotate(s.angle);
+        ctx.strokeStyle = '#f6f6f4'; // --paper
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(12, 0);
+        ctx.lineTo(-8, 7);
+        ctx.lineTo(-5, 0);
+        ctx.lineTo(-8, -7);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function clear() {
+        const rect = canvas.getBoundingClientRect();
+        ctx.fillStyle = '#15171a'; // --ink
+        ctx.fillRect(0, 0, rect.width, rect.height);
+      }
+
+      // -------- Loop --------
+      function frame(t: number) {
+        if (!running) return;
+        const dt = Math.min((t - lastT) / 1000, 0.05);
+        lastT = t;
+        clear();
+        drawShip(ship);
+        rafId = requestAnimationFrame(frame);
+      }
+
+      function start() {
+        if (running) return;
+        running = true;
+        resize();
+        lastT = performance.now();
+        rafId = requestAnimationFrame(frame);
+      }
+
+      function stop() {
+        running = false;
+        cancelAnimationFrame(rafId);
+      }
+
+      // -------- Events --------
+      document.addEventListener('anaximander:start', () => {
+        root.setAttribute('data-state', 'active');
+        root.removeAttribute('aria-hidden');
+        start();
+      });
+
+      window.addEventListener('resize', () => {
+        if (running) resize();
+      });
+    }
   }
 </script>
