@@ -116,7 +116,7 @@ collections:
     identifier_field: title
     fields:
       - { label: "Title", name: title, widget: string }
-      - { label: "Date", name: date, widget: date }
+      - { label: "Date", name: date, widget: datetime, type: date }
       - label: "Kind"
         name: kind
         widget: select
@@ -181,7 +181,7 @@ collections:
       - { label: "Title", name: title, widget: string }
       - { label: "Venue", name: venue, widget: string }
       - { label: "Location", name: location, widget: string, required: false }
-      - { label: "Date", name: date, widget: date }
+      - { label: "Date", name: date, widget: datetime, type: date }
       - label: "Type"
         name: type
         widget: select
@@ -217,8 +217,8 @@ collections:
           - { label: "Committee member", value: committee-member }
       - { label: "Venue", name: venue, widget: string }
       - { label: "Location", name: location, widget: string, required: false }
-      - { label: "Start date", name: start_date, widget: date }
-      - { label: "End date", name: end_date, widget: date, required: false }
+      - { label: "Start date", name: start_date, widget: datetime, type: date }
+      - { label: "End date", name: end_date, widget: datetime, type: date, required: false }
       - { label: "URL", name: url, widget: string, required: false }
       - { label: "Co-organizers", name: co_organizers, widget: string, required: false }
       - { label: "Description", name: description, widget: text, required: false }
