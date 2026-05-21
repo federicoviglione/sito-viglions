@@ -64,6 +64,15 @@
   .anaximander-stage .anaximander-canvas {
     width: 100%;
   }
+  @media (max-width: 600px) and (orientation: portrait) {
+    .anaximander-canvas {
+      aspect-ratio: 3 / 4;
+      width: min(100%, 480px);
+    }
+    .anaximander-stage {
+      width: 100%;
+    }
+  }
   .anaximander-hud {
     position: absolute;
     top: var(--space-3);
@@ -397,15 +406,26 @@
       function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const rect = canvas.getBoundingClientRect();
-        canvasW = Math.floor(rect.width);
-        canvasH = Math.floor(rect.height);
-        canvas.width = canvasW * dpr;
-        canvas.height = canvasH * dpr;
+        const w = Math.floor(rect.width);
+        const h = Math.floor(rect.height);
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        if (!running) {
-          ship.x = canvasW / 2;
-          ship.y = canvasH / 2;
+
+        // If we had prior dimensions and they changed, rescale entities to preserve relative positions
+        if (canvasW > 0 && canvasH > 0 && (canvasW !== w || canvasH !== h)) {
+          const sx = w / canvasW;
+          const sy = h / canvasH;
+          ship.x *= sx; ship.y *= sy;
+          for (const b of bullets) { b.x *= sx; b.y *= sy; }
+          for (const r of rocks) { r.x *= sx; r.y *= sy; }
+        } else if (!running) {
+          ship.x = w / 2;
+          ship.y = h / 2;
         }
+
+        canvasW = w;
+        canvasH = h;
       }
 
       // -------- Drawing --------
@@ -659,6 +679,10 @@
 
       window.addEventListener('resize', () => {
         if (running) resize();
+      });
+
+      window.addEventListener('orientationchange', () => {
+        if (running) setTimeout(resize, 50);
       });
 
       window.addEventListener('keydown', onKeyDown);

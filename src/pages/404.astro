@@ -86,6 +86,13 @@ const siteName = site?.data.name ?? 'Federico Viglione';
 <script>
   const btn = document.getElementById('wander-btn');
   btn?.addEventListener('click', () => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mq.matches) {
+      const ok = window.confirm(
+        'This is a small animated game with motion. Play anyway?'
+      );
+      if (!ok) return;
+    }
     document.dispatchEvent(new CustomEvent('anaximander:start'));
   });
 </script>
