@@ -7,8 +7,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR = join(__dirname, '..', 'public', 'fonts');
 
 // Fraunces upstream (undercasetype/Fraunces) only ships TTF variable fonts;
-// fontsource provides a stable woff2 build with the wght axis. Inter ships a
-// woff2 directly from rsms/inter.
+// fontsource provides a stable full-axis woff2 build (wght, opsz, SOFT, WONK
+// preserved). Inter ships a woff2 directly from rsms/inter.
 const FONTS = [
   {
     name: 'Fraunces-VariableFont.woff2',
