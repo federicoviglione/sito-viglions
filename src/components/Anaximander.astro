@@ -113,10 +113,13 @@
       function spawnWave(n: number, speedMul: number) {
         rocks.length = 0;
         for (let i = 0; i < n; i++) {
-          // Spawn on the borders to avoid spawning on top of the ship
           const onTop = Math.random() < 0.5;
-          const x = onTop ? Math.random() * canvasW : (Math.random() < 0.5 ? 0 : canvasW);
-          const y = onTop ? (Math.random() < 0.5 ? 0 : canvasH) : Math.random() * canvasH;
+          const x = onTop
+            ? Math.random() * canvasW
+            : (Math.random() < 0.5 ? 0 : canvasW - 1);
+          const y = onTop
+            ? (Math.random() < 0.5 ? 0 : canvasH - 1)
+            : Math.random() * canvasH;
           rocks.push(makeRock(x, y, 'L', speedMul));
         }
       }
@@ -277,6 +280,8 @@
         bullets.length = 0;
         wave = 1;
         resize();
+        ship.x = canvasW / 2;
+        ship.y = canvasH / 2;
         spawnWave(3, 1);
         running = true;
         lastT = performance.now();
