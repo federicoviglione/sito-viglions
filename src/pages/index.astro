@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import ResearchSection from '../components/ResearchSection.astro';
+import NewsSection from '../components/NewsSection.astro';
+import PublicationsSection from '../components/PublicationsSection.astro';
+import TalksSection from '../components/TalksSection.astro';
+import OrganizedEventsSection from '../components/OrganizedEventsSection.astro';
+import Contact from '../components/Contact.astro';
+import { getEntry, getCollection, render } from 'astro:content';
+
+const site = await getEntry('site', 'info');
+if (!site) throw new Error('Missing site/info data entry');
+
+const bio = await getEntry('bio', 'main');
+if (!bio) throw new Error('Missing bio/main content entry');
+const { Content: BioContent } = await render(bio);
+
+const research = await getCollection('research');
+const news = await getCollection('news');
+const publications = await getCollection('publications');
+const talks = await getCollection('talks');
+const organizedEvents = await getCollection('organized_events');
+
+const navItems = [
+  { id: 'about', label: 'about' },
+  research.length > 0 && { id: 'research', label: 'research' },
+  news.length > 0 && { id: 'news', label: 'news' },
+  publications.length > 0 && { id: 'publications', label: 'publications' },
+  talks.length > 0 && { id: 'talks', label: 'talks' },
+  organizedEvents.length > 0 && { id: 'organized-events', label: 'organized events' },
+  { id: 'contact', label: 'contact' },
+].filter(Boolean) as Array<{ id: string; label: string }>;
+
+const social = {
+  email: site.data.email,
+  orcid_url: site.data.orcid_url,
+  scholar_url: site.data.scholar_url,
+  philpeople_url: site.data.philpeople_url,
+  academia_url: site.data.academia_url,
+  github_url: site.data.github_url,
+};
+---
+
+<Layout title={`${site.data.name} — ${site.data.role}`}>
+  <Nav items={navItems} siteName={site.data.name} />
+
+  <Hero
+    name={site.data.name}
+    role={site.data.role}
+    affiliation={site.data.affiliation}
+    location={site.data.location}
+    tagline={site.data.tagline}
+    research_tags={site.data.research_tags}
+    photo={site.data.photo}
+    photo_credit={site.data.photo_credit}
+    social={social}
+  />
+
+  <section id="about" class="about-wrapper container">
+    <header class="section-head">
+      <div class="label">About</div>
+      <h2 class="section-title">Biography</h2>
+    </header>
+    <div class="prose">
+      <BioContent />
+    </div>
+    <About
+      affiliations={site.data.affiliations}
+      education={site.data.education}
+      editorial_roles={site.data.editorial_roles}
+      memberships={site.data.memberships}
+      project_memberships={site.data.project_memberships}
+      peer_review_for={site.data.peer_review_for}
+    />
+  </section>
+
+  <ResearchSection />
+  <NewsSection />
+  <PublicationsSection />
+  <TalksSection />
+  <OrganizedEventsSection />
+
+  <Contact social={social} cv_pdf={site.data.cv_pdf} />
+
+  <Footer siteName={site.data.name} />
+</Layout>
+
+<style>
+  .about-wrapper {
+    padding-block: var(--space-7);
+  }
+  .section-head {
+    margin-bottom: var(--space-5);
+  }
+  .section-head .label {
+    margin-bottom: var(--space-2);
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .prose {
+    max-width: var(--max-prose);
+    font-size: var(--fs-base);
+    line-height: 1.65;
+    margin-bottom: var(--space-7);
+  }
+  .prose :global(p) {
+    margin-bottom: var(--space-4);
+  }
+  .prose :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .prose :global(a) {
+    color: var(--ink);
+    border-bottom: 1px dotted var(--rule);
+  }
+  .prose :global(a:hover) {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>
