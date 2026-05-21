@@ -41,20 +41,21 @@
       let running = false;
       let lastT = 0;
       let rafId = 0;
+      let canvasW = 0;
+      let canvasH = 0;
 
       // -------- Canvas sizing --------
       function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
         const rect = canvas.getBoundingClientRect();
-        const w = Math.floor(rect.width);
-        const h = Math.floor(rect.height);
-        canvas.width = w * dpr;
-        canvas.height = h * dpr;
+        canvasW = Math.floor(rect.width);
+        canvasH = Math.floor(rect.height);
+        canvas.width = canvasW * dpr;
+        canvas.height = canvasH * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        // Center ship if not started
         if (!running) {
-          ship.x = w / 2;
-          ship.y = h / 2;
+          ship.x = canvasW / 2;
+          ship.y = canvasH / 2;
         }
       }
 
@@ -76,9 +77,8 @@
       }
 
       function clear() {
-        const rect = canvas.getBoundingClientRect();
-        ctx.fillStyle = '#15171a'; // --ink
-        ctx.fillRect(0, 0, rect.width, rect.height);
+        ctx.fillStyle = '#15171a';
+        ctx.fillRect(0, 0, canvasW, canvasH);
       }
 
       // -------- Loop --------
@@ -93,8 +93,8 @@
 
       function start() {
         if (running) return;
-        running = true;
         resize();
+        running = true;
         lastT = performance.now();
         rafId = requestAnimationFrame(frame);
       }
