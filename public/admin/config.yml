@@ -3,11 +3,12 @@ backend:
   name: github
   repo: AlbyIanna/sito-viglions
   branch: main
-  base_url: https://auth.sveltia.app
+  base_url: https://sveltia-cms-auth.alby-ianna.workers.dev
 
-# Sveltia CMS auth: uses the official, free OAuth proxy hosted at auth.sveltia.app.
-# No need to register a GitHub OAuth app — the proxy handles the GitHub OAuth flow
-# and returns a short-lived token scoped to this repo.
+# Sveltia CMS auth: OAuth proxy deployed on Cloudflare Workers from
+# https://github.com/sveltia/sveltia-cms-auth — bound to a dedicated GitHub OAuth
+# App. Callback URL: https://sveltia-cms-auth.alby-ianna.workers.dev/callback.
+# Worker secrets GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET set via `wrangler secret put`.
 media_folder: public/uploads
 public_folder: /uploads
 
