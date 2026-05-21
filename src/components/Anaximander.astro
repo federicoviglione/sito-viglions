@@ -60,6 +60,13 @@
 
       const keys = new Set<string>();
 
+      type Bullet = { x: number; y: number; vx: number; vy: number; life: number };
+      const bullets: Bullet[] = [];
+      let fireCooldown = 0;
+      const BULLET_SPEED = 500; // px/sec
+      const BULLET_LIFE = 0.8;  // sec
+      const FIRE_COOLDOWN = 0.15; // sec
+
       function onKeyDown(e: KeyboardEvent) {
         if (!running) return;
         const k = e.key;
@@ -127,12 +134,45 @@
             ship.vy = (ship.vy / sp) * MAX_SPEED;
           }
         }
-        // Drag (frame-rate compensated)
         const dragF = Math.pow(DRAG, dt * 60);
         ship.vx *= dragF;
         ship.vy *= dragF;
         ship.x = wrap(ship.x + ship.vx * dt, canvasW);
         ship.y = wrap(ship.y + ship.vy * dt, canvasH);
+
+        // Fire
+        fireCooldown = Math.max(0, fireCooldown - dt);
+        if (keys.has(' ') && fireCooldown === 0) {
+          bullets.push({
+            x: ship.x + Math.cos(ship.angle) * 12,
+            y: ship.y + Math.sin(ship.angle) * 12,
+            vx: Math.cos(ship.angle) * BULLET_SPEED + ship.vx,
+            vy: Math.sin(ship.angle) * BULLET_SPEED + ship.vy,
+            life: BULLET_LIFE,
+          });
+          fireCooldown = FIRE_COOLDOWN;
+        }
+
+        // Bullets update
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          b.life -= dt;
+          if (b.life <= 0) {
+            bullets.splice(i, 1);
+            continue;
+          }
+          b.x = wrap(b.x + b.vx * dt, canvasW);
+          b.y = wrap(b.y + b.vy * dt, canvasH);
+        }
+      }
+
+      function drawBullets() {
+        ctx.fillStyle = '#f6f6f4';
+        for (const b of bullets) {
+          ctx.beginPath();
+          ctx.arc(b.x, b.y, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
 
       function frame(t: number) {
@@ -141,6 +181,7 @@
         lastT = t;
         update(dt);
         clear();
+        drawBullets();
         drawShip(ship);
         rafId = requestAnimationFrame(frame);
       }
