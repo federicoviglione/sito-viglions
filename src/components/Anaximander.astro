@@ -4,7 +4,17 @@
 ---
 
 <div class="anaximander" data-state="idle" aria-hidden="true">
-  <canvas class="anaximander-canvas" width="720" height="450"></canvas>
+  <div class="anaximander-stage">
+    <canvas class="anaximander-canvas" width="720" height="450"></canvas>
+    <div class="anaximander-hud" aria-live="off">
+      <span class="hud-label">observations</span>
+      <span class="hud-score" data-score>0</span>
+      <span class="hud-divider">/</span>
+      <span class="hud-best" data-best>0</span>
+      <span class="hud-label">wave</span>
+      <span class="hud-wave" data-wave>1</span>
+    </div>
+  </div>
 </div>
 
 <style>
@@ -23,6 +33,37 @@
     background: var(--ink);
     border: 1px solid var(--rule);
   }
+  .anaximander-stage {
+    position: relative;
+    width: min(100%, 720px);
+  }
+  .anaximander-stage .anaximander-canvas {
+    width: 100%;
+  }
+  .anaximander-hud {
+    position: absolute;
+    top: var(--space-3);
+    left: var(--space-3);
+    right: var(--space-3);
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    pointer-events: none;
+    mix-blend-mode: difference;
+  }
+  .hud-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+  }
+  .hud-score, .hud-best, .hud-wave {
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-divider { opacity: 0.4; }
 </style>
 
 <script>
@@ -90,6 +131,31 @@
       };
       const rocks: Rock[] = [];
       let wave = 1;
+      let score = 0;
+      const HIGH_KEY = 'anaximander.highscore';
+      let best = 0;
+      try { best = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10) || 0; } catch {}
+
+      const ROCK_SCORE: Record<RockSize, number> = { L: 20, M: 50, S: 100 };
+
+      const elScore = document.querySelector<HTMLElement>('[data-score]');
+      const elBest = document.querySelector<HTMLElement>('[data-best]');
+      const elWave = document.querySelector<HTMLElement>('[data-wave]');
+
+      function syncHud() {
+        if (elScore) elScore.textContent = String(score);
+        if (elBest) elBest.textContent = String(best);
+        if (elWave) elWave.textContent = String(wave);
+      }
+
+      function addScore(size: RockSize) {
+        score += ROCK_SCORE[size];
+        if (score > best) {
+          best = score;
+          try { localStorage.setItem(HIGH_KEY, String(best)); } catch {}
+        }
+        syncHud();
+      }
 
       const ROCK_RADIUS: Record<RockSize, number> = { L: 38, M: 22, S: 12 };
       const ROCK_SPEED: Record<RockSize, number> = { L: 35, M: 55, S: 80 };
@@ -206,6 +272,8 @@
             ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
             spawnWave(3, 1);
             wave = 1;
+            score = 0;
+            syncHud();
           }
           return;
         }
@@ -266,6 +334,7 @@
             const r = rocks[j];
             if (circleHit(b.x, b.y, 2, r.x, r.y, r.radius)) {
               bullets.splice(i, 1);
+              addScore(r.size);
               const fragments = splitRock(r);
               rocks.splice(j, 1, ...fragments);
               break;
@@ -281,6 +350,14 @@
               break;
             }
           }
+        }
+
+        // Wave clear?
+        if (rocks.length === 0 && ship.alive !== false) {
+          wave += 1;
+          const speedMul = Math.min(1 + 0.05 * (wave - 1), 2);
+          spawnWave(2 + wave, speedMul);
+          syncHud();
         }
       }
 
@@ -333,11 +410,13 @@
         ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         wave = 1;
+        score = 0;
         deathTimer = 0;
         resize();
         ship.x = canvasW / 2;
         ship.y = canvasH / 2;
         spawnWave(3, 1);
+        syncHud();
         running = true;
         lastT = performance.now();
         rafId = requestAnimationFrame(frame);
