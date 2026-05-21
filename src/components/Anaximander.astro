@@ -637,7 +637,14 @@
         }
       }
 
+      function clearInputState() {
+        keys.clear();
+        for (const set of Object.values(touchHold)) set.clear();
+        fireCooldown = 0;
+      }
+
       function restart() {
+        clearInputState();
         gameOver = false;
         if (elOverlay) elOverlay.hidden = true;
         ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
@@ -655,6 +662,7 @@
       }
 
       function exitGame() {
+        clearInputState();
         stop();
         gameOver = false;
         paused = false;
