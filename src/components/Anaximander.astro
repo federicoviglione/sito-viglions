@@ -274,14 +274,18 @@
 
 <script>
   const root = document.querySelector<HTMLDivElement>('.anaximander');
-  const canvas = document.querySelector<HTMLCanvasElement>('.anaximander-canvas');
-  if (!root || !canvas) {
+  const canvasOrNull = document.querySelector<HTMLCanvasElement>('.anaximander-canvas');
+  if (!root || !canvasOrNull) {
     // No-op: canvas non disponibile o componente non montato.
   } else {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
+    // Re-bind so TS narrowing survives the nested closures below.
+    const canvas: HTMLCanvasElement = canvasOrNull;
+    const ctxOrNull = canvas.getContext('2d');
+    if (!ctxOrNull) {
       console.warn('[anaximander] canvas 2d context not available');
     } else {
+      // Re-bind to a non-nullable const so TS narrowing survives the nested closures below.
+      const ctx: CanvasRenderingContext2D = ctxOrNull;
       // -------- Game state --------
       type Ship = { x: number; y: number; vx: number; vy: number; angle: number; alive?: boolean };
       let ship: Ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
