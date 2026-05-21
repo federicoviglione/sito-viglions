@@ -1,0 +1,67 @@
+---
+interface Props {
+  title: string;
+  role: string;
+  venue: string;
+  location?: string;
+  start_date: Date;
+  end_date?: Date;
+  url?: string;
+  co_organizers?: string;
+  description?: string;
+}
+const { title, role, venue, location, start_date, end_date, url, co_organizers, description } = Astro.props;
+
+function fmtRange(start: Date, end?: Date) {
+  const opts: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
+  const s = start.toLocaleDateString('en-US', opts);
+  if (!end) return s;
+  const e = end.toLocaleDateString('en-US', opts);
+  return s === e ? s : `${s} – ${e}`;
+}
+const roleLabel = role.replace('-', ' ');
+---
+<article class="event">
+  <div class="event-row">
+    <div class="event-main">
+      <h3 class="event-title">
+        {url ? <a href={url} target="_blank" rel="noopener noreferrer">{title}</a> : title}
+      </h3>
+      <p class="event-meta">
+        <span>{venue}</span>{location ? <> · <span>{location}</span></> : null} · <span>{fmtRange(start_date, end_date)}</span>
+      </p>
+      {co_organizers && <p class="co-organizers"><em>{co_organizers}</em></p>}
+      {description && <p class="event-description">{description}</p>}
+    </div>
+    <div class="event-side">
+      <span class="role-chip">{roleLabel}</span>
+    </div>
+  </div>
+</article>
+
+<style>
+  .event { padding-block: var(--space-4); border-top: 1px solid var(--rule); }
+  .event-row { display: flex; justify-content: space-between; gap: var(--space-4); align-items: start; }
+  .event-title { font-size: var(--fs-base); font-weight: 500; margin-bottom: var(--space-1); }
+  .event-title a { color: var(--ink); border-bottom: 1px dotted var(--rule); }
+  .event-title a:hover { color: var(--accent); border-color: var(--accent); }
+  .event-meta { font-size: var(--fs-sm); color: var(--muted); }
+  .co-organizers { font-size: var(--fs-sm); color: var(--muted); margin-top: var(--space-1); }
+  .event-description { font-size: var(--fs-sm); margin-top: var(--space-2); max-width: var(--max-prose); }
+  .event-side { text-align: right; }
+  .role-chip {
+    font-size: 10px;
+    text-transform: capitalize;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    .event-row { flex-direction: column; }
+    .event-side { align-self: flex-start; }
+  }
+</style>

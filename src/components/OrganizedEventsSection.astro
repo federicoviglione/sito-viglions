@@ -1,0 +1,25 @@
+---
+import { getCollection } from 'astro:content';
+import OrganizedEventItem from './OrganizedEventItem.astro';
+
+const all = await getCollection('organized_events');
+const sorted = all.sort((a, b) => (b.data.start_date as Date).getTime() - (a.data.start_date as Date).getTime());
+---
+{sorted.length > 0 && (
+  <section id="organized-events" class="organized container">
+    <header class="section-head">
+      <div class="label">Organized events</div>
+      <h2 class="section-title">Conferences &amp; workshops</h2>
+    </header>
+    <div class="events-list">
+      {sorted.map(e => <OrganizedEventItem {...e.data} />)}
+    </div>
+  </section>
+)}
+
+<style>
+  .organized { padding-block: var(--space-7); }
+  .section-head { margin-bottom: var(--space-4); }
+  .section-head .label { margin-bottom: var(--space-2); }
+  .events-list > :global(article.event:last-child) { border-bottom: 1px solid var(--rule); }
+</style>
