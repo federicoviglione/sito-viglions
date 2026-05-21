@@ -13,8 +13,20 @@
       <span class="hud-wave" data-wave>1</span>
     </div>
     <div class="anaximander-overlay" data-overlay hidden>
-      <p class="overlay-title" data-overlay-title>Drift over.</p>
-      <p class="overlay-sub" data-overlay-sub>—</p>
+      <p class="overlay-title">Drift over.</p>
+      <div class="overlay-stats">
+        <div class="stat">
+          <span class="stat-label">Top speed</span>
+          <span class="stat-value" data-overlay-topspeed>0.000c</span>
+          <span class="stat-detail" data-overlay-topspeed-kmh>0 km/h</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Distance travelled</span>
+          <span class="stat-value" data-overlay-distance>0 km</span>
+        </div>
+      </div>
+      <p class="overlay-reference" data-overlay-reference></p>
+      <p class="overlay-best" data-overlay-best></p>
       <div class="overlay-actions">
         <button type="button" data-action="restart">Restart</button>
       </div>
@@ -110,9 +122,59 @@
     font-weight: 500;
     letter-spacing: -0.01em;
   }
-  .overlay-sub {
+  .overlay-stats {
+    display: flex;
+    gap: var(--space-7);
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+  }
+  .stat-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.6;
+  }
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: var(--fs-xl);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
+  .stat-detail {
     font-size: var(--fs-sm);
     opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+  }
+  .overlay-reference {
+    font-size: var(--fs-sm);
+    max-width: 52ch;
+    line-height: 1.5;
+    opacity: 0.85;
+  }
+  /* The <a> is created dynamically by JS, so it doesn't carry Astro's scope
+     attribute. Use :global() to reach it. */
+  .overlay-reference :global(a) {
+    color: var(--paper);
+    border-bottom: 1px dotted rgba(246, 246, 244, 0.4);
+    transition: border-color 150ms ease, color 150ms ease;
+  }
+  .overlay-reference :global(a:hover) {
+    color: var(--paper);
+    border-bottom-color: var(--paper);
+  }
+  .overlay-best {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.55;
+    min-height: 1em;
   }
   .overlay-actions { display: flex; gap: var(--space-3); }
   .overlay-actions button {
@@ -232,7 +294,11 @@
       let paused = false;
       let gameOver = false;
       const elOverlay = root.querySelector<HTMLElement>('[data-overlay]');
-      const elOverlaySub = root.querySelector<HTMLElement>('[data-overlay-sub]');
+      const elOverlayTopspeed = root.querySelector<HTMLElement>('[data-overlay-topspeed]');
+      const elOverlayTopspeedKmh = root.querySelector<HTMLElement>('[data-overlay-topspeed-kmh]');
+      const elOverlayDistance = root.querySelector<HTMLElement>('[data-overlay-distance]');
+      const elOverlayReference = root.querySelector<HTMLElement>('[data-overlay-reference]');
+      const elOverlayBest = root.querySelector<HTMLElement>('[data-overlay-best]');
       const elPause = root.querySelector<HTMLElement>('[data-pause]');
       const elRestart = root.querySelector<HTMLButtonElement>('[data-action="restart"]');
       const elTouch = root.querySelector<HTMLElement>('[data-touch]');
@@ -298,13 +364,80 @@
       // -------- Velocity (relativistic display) --------
       // C_PIXELS = THRUST * 1000 so that one second of thrust raises v by 0.001c.
       const C_PIXELS = 200_000;
+      // Speed of light in km/s, used to convert pixel-space speeds to physical km.
+      const C_KM_PER_SEC = 299_792.458;
+      const KM_PER_PIXEL = C_KM_PER_SEC / C_PIXELS;
       const MAXV_KEY = 'anaximander.maxv';
       let maxV = 0;
       let bestV = 0;
+      let distancePx = 0;
       try { bestV = parseFloat(localStorage.getItem(MAXV_KEY) || '0') || 0; } catch {}
 
       function formatC(v: number): string {
         return (v / C_PIXELS).toFixed(3) + 'c';
+      }
+
+      function formatKmh(pxPerSec: number): string {
+        const kmh = pxPerSec * KM_PER_PIXEL * 3600;
+        return kmh.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' km/h';
+      }
+
+      function formatKm(km: number): string {
+        if (km < 1) return km.toFixed(2) + ' km';
+        if (km < 1e6) return km.toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' km';
+        if (km < 1e9) return (km / 1e6).toFixed(2) + ' million km';
+        if (km < 1e12) return (km / 1e9).toFixed(2) + ' billion km';
+        if (km < 1e15) return (km / 1e12).toFixed(2) + ' trillion km';
+        // Scientific notation for cosmic distances (>= 1 quadrillion km).
+        const exp = km.toExponential(2);
+        const [mantissa, e] = exp.split('e');
+        return `${mantissa} × 10^${parseInt(e, 10)} km`;
+      }
+
+      // -------- Distance references --------
+      // Ordered ascending by km. Used to compare run distance against real-world scales.
+      type DistanceRef = { km: number; label: string; url: string };
+      const DISTANCE_REFERENCES: DistanceRef[] = [
+        { km: 42.195,                label: 'the length of a marathon',                                     url: 'https://en.wikipedia.org/wiki/Marathon' },
+        { km: 343,                   label: 'the distance from London to Paris',                            url: 'https://en.wikipedia.org/wiki/Eurostar' },
+        { km: 415,                   label: 'the long diagonal of Sicily',                                  url: 'https://en.wikipedia.org/wiki/Sicily' },
+        { km: 1_185,                 label: 'the length of Italy from north to south',                      url: 'https://en.wikipedia.org/wiki/Italy' },
+        { km: 3_860,                 label: 'the width of the Mediterranean Sea',                           url: 'https://en.wikipedia.org/wiki/Mediterranean_Sea' },
+        { km: 3_935,                 label: 'the distance from New York to Los Angeles',                    url: 'https://en.wikipedia.org/wiki/Los_Angeles' },
+        { km: 4_506,                 label: 'the width of the contiguous United States',                    url: 'https://en.wikipedia.org/wiki/Contiguous_United_States' },
+        { km: 6_888,                 label: 'the distance from Rome to New York',                           url: 'https://en.wikipedia.org/wiki/New_York_City' },
+        { km: 9_560,                 label: 'the distance from London to Tokyo',                            url: 'https://en.wikipedia.org/wiki/Tokyo' },
+        { km: 12_742,                label: "Earth's mean diameter",                                        url: 'https://en.wikipedia.org/wiki/Earth_radius' },
+        { km: 35_786,                label: 'the altitude of geostationary orbit',                          url: 'https://en.wikipedia.org/wiki/Geostationary_orbit' },
+        { km: 40_075,                label: "Earth's equatorial circumference",                             url: 'https://en.wikipedia.org/wiki/Earth%27s_circumference' },
+        { km: 299_792,               label: 'one light-second',                                             url: 'https://en.wikipedia.org/wiki/Light-second' },
+        { km: 384_400,               label: 'the distance from Earth to the Moon',                          url: 'https://en.wikipedia.org/wiki/Lunar_distance' },
+        { km: 1_391_400,             label: "the Sun's diameter",                                           url: 'https://en.wikipedia.org/wiki/Sun' },
+        { km: 38_000_000,            label: "the closest approach of Venus to Earth",                       url: 'https://en.wikipedia.org/wiki/Venus' },
+        { km: 54_600_000,            label: "the closest approach of Mars to Earth",                        url: 'https://en.wikipedia.org/wiki/Mars' },
+        { km: 77_300_000,            label: "the closest approach of Mercury to Earth",                     url: 'https://en.wikipedia.org/wiki/Mercury_(planet)' },
+        { km: 149_597_871,           label: 'one astronomical unit (Earth to Sun)',                         url: 'https://en.wikipedia.org/wiki/Astronomical_unit' },
+        { km: 778_547_200,           label: 'the distance from the Sun to Jupiter',                         url: 'https://en.wikipedia.org/wiki/Jupiter' },
+        { km: 1_434_000_000,         label: 'the distance from the Sun to Saturn',                          url: 'https://en.wikipedia.org/wiki/Saturn' },
+        { km: 2_872_000_000,         label: 'the distance from the Sun to Uranus',                          url: 'https://en.wikipedia.org/wiki/Uranus' },
+        { km: 4_495_000_000,         label: 'the distance from the Sun to Neptune',                         url: 'https://en.wikipedia.org/wiki/Neptune' },
+        { km: 5_906_400_000,         label: "the Sun-Pluto mean distance",                                  url: 'https://en.wikipedia.org/wiki/Pluto' },
+        { km: 18_000_000_000,        label: 'the heliopause, where the solar wind meets interstellar space', url: 'https://en.wikipedia.org/wiki/Heliopause' },
+        { km: 24_500_000_000,        label: "Voyager 1's current distance from Earth",                      url: 'https://en.wikipedia.org/wiki/Voyager_1' },
+        { km: 25_902_068_000,        label: 'one light-day',                                                url: 'https://en.wikipedia.org/wiki/Light-year' },
+        { km: 300_000_000_000,       label: 'the inner edge of the Oort cloud',                             url: 'https://en.wikipedia.org/wiki/Oort_cloud' },
+        { km: 9_460_730_472_580,     label: 'one light-year',                                               url: 'https://en.wikipedia.org/wiki/Light-year' },
+        { km: 4.0208e13,             label: 'the distance to Proxima Centauri, the closest star',           url: 'https://en.wikipedia.org/wiki/Proxima_Centauri' },
+        { km: 2.46e17,               label: 'the distance to the centre of the Milky Way',                  url: 'https://en.wikipedia.org/wiki/Galactic_Center' },
+        { km: 2.364e19,              label: 'the distance to the Andromeda Galaxy',                         url: 'https://en.wikipedia.org/wiki/Andromeda_Galaxy' },
+        { km: 8.8e23,                label: 'the radius of the observable universe',                        url: 'https://en.wikipedia.org/wiki/Observable_universe' },
+      ];
+
+      function findReference(distKm: number): DistanceRef | null {
+        for (let i = DISTANCE_REFERENCES.length - 1; i >= 0; i--) {
+          if (DISTANCE_REFERENCES[i].km <= distKm) return DISTANCE_REFERENCES[i];
+        }
+        return null;
       }
 
       const elVelocity = root.querySelector<HTMLElement>('[data-velocity]');
@@ -466,7 +599,7 @@
         ship.x = wrap(ship.x + ship.vx * dt, canvasW);
         ship.y = wrap(ship.y + ship.vy * dt, canvasH);
 
-        // Track max velocity reached this run, and personal best.
+        // Track max velocity reached this run, personal best, and accumulated distance.
         const speedNow = Math.hypot(ship.vx, ship.vy);
         if (speedNow > maxV) {
           maxV = speedNow;
@@ -475,6 +608,7 @@
             try { localStorage.setItem(MAXV_KEY, String(bestV)); } catch {}
           }
         }
+        distancePx += speedNow * dt;
 
         // Fire
         fireCooldown = Math.max(0, fireCooldown - dt);
@@ -597,6 +731,7 @@
         bullets.length = 0;
         wave = 1;
         maxV = 0;
+        distancePx = 0;
         deathTimer = 0;
         resize();
         ship.x = canvasW / 2;
@@ -611,13 +746,37 @@
 
       function triggerGameOver() {
         gameOver = true;
-        if (elOverlay) {
-          elOverlay.hidden = false;
-          if (elOverlaySub) {
-            elOverlaySub.textContent = `Top speed: ${formatC(maxV)}. Personal best: ${formatC(bestV)}.`;
+        if (!elOverlay) return;
+        elOverlay.hidden = false;
+
+        const distKm = distancePx * KM_PER_PIXEL;
+        if (elOverlayTopspeed) elOverlayTopspeed.textContent = formatC(maxV);
+        if (elOverlayTopspeedKmh) elOverlayTopspeedKmh.textContent = formatKmh(maxV);
+        if (elOverlayDistance) elOverlayDistance.textContent = formatKm(distKm);
+
+        if (elOverlayReference) {
+          const ref = findReference(distKm);
+          if (ref) {
+            const a = document.createElement('a');
+            a.href = ref.url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.textContent = ref.label;
+            elOverlayReference.replaceChildren(
+              document.createTextNode('Farther than '),
+              a,
+              document.createTextNode(` (${formatKm(ref.km)}).`),
+            );
+          } else {
+            elOverlayReference.textContent = 'A short hop in the cosmos.';
           }
-          elRestart?.focus();
         }
+
+        if (elOverlayBest) {
+          elOverlayBest.textContent = bestV > 0 ? `personal best ${formatC(bestV)}` : '';
+        }
+
+        elRestart?.focus();
       }
 
       function clearInputState() {
@@ -634,6 +793,7 @@
         bullets.length = 0;
         wave = 1;
         maxV = 0;
+        distancePx = 0;
         deathTimer = 0;
         spawnWave(3, 1);
         syncHud();
