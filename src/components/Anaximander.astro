@@ -1,16 +1,14 @@
 ---
 // Anaximander — mini Asteroids easter-egg, vector-clean editorial style.
-// Activated by dispatching a 'anaximander:start' CustomEvent on `document`.
+// Always running once the 404 page is mounted; aria-hidden for AT users.
 ---
 
-<div class="anaximander" data-state="idle" aria-hidden="true">
+<div class="anaximander" aria-hidden="true">
   <div class="anaximander-stage">
     <canvas class="anaximander-canvas" width="720" height="450"></canvas>
     <div class="anaximander-hud" aria-live="off">
-      <span class="hud-label">observations</span>
-      <span class="hud-score" data-score>0</span>
-      <span class="hud-divider">/</span>
-      <span class="hud-best" data-best>0</span>
+      <span class="hud-label">velocity</span>
+      <span class="hud-velocity" data-velocity>0.000c</span>
       <span class="hud-label">wave</span>
       <span class="hud-wave" data-wave>1</span>
     </div>
@@ -19,7 +17,6 @@
       <p class="overlay-sub" data-overlay-sub>—</p>
       <div class="overlay-actions">
         <button type="button" data-action="restart">Restart</button>
-        <button type="button" data-action="exit">Exit</button>
       </div>
     </div>
     <div class="anaximander-pause" data-pause hidden>Paused — press P or tap</div>
@@ -34,7 +31,6 @@
       </div>
       <div class="touch-top">
         <button type="button" class="touch-btn touch-btn--small" data-touch-action="pause" aria-label="Pause">‖</button>
-        <button type="button" class="touch-btn touch-btn--small" data-touch-action="exit" aria-label="Exit">✕</button>
       </div>
     </div>
   </div>
@@ -42,12 +38,9 @@
 
 <style>
   .anaximander {
-    display: none;
+    display: block;
     position: relative;
     margin-block: var(--space-5);
-  }
-  .anaximander[data-state="active"] {
-    display: block;
   }
   .anaximander-canvas {
     display: block;
@@ -93,10 +86,9 @@
     letter-spacing: 0.15em;
     opacity: 0.7;
   }
-  .hud-score, .hud-best, .hud-wave {
+  .hud-velocity, .hud-wave {
     font-variant-numeric: tabular-nums;
   }
-  .hud-divider { opacity: 0.4; }
 
   .anaximander-overlay {
     position: absolute;
@@ -243,7 +235,6 @@
       const elOverlaySub = root.querySelector<HTMLElement>('[data-overlay-sub]');
       const elPause = root.querySelector<HTMLElement>('[data-pause]');
       const elRestart = root.querySelector<HTMLButtonElement>('[data-action="restart"]');
-      const elExit = root.querySelector<HTMLButtonElement>('[data-action="exit"]');
       const elTouch = root.querySelector<HTMLElement>('[data-touch]');
       const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
@@ -303,30 +294,28 @@
       };
       const rocks: Rock[] = [];
       let wave = 1;
-      let score = 0;
-      const HIGH_KEY = 'anaximander.highscore';
-      let best = 0;
-      try { best = parseInt(localStorage.getItem(HIGH_KEY) || '0', 10) || 0; } catch {}
 
-      const ROCK_SCORE: Record<RockSize, number> = { L: 20, M: 50, S: 100 };
+      // -------- Velocity (relativistic display) --------
+      // C_PIXELS = THRUST * 1000 so that one second of thrust raises v by 0.001c.
+      const C_PIXELS = 200_000;
+      const MAXV_KEY = 'anaximander.maxv';
+      let maxV = 0;
+      let bestV = 0;
+      try { bestV = parseFloat(localStorage.getItem(MAXV_KEY) || '0') || 0; } catch {}
 
-      const elScore = root.querySelector<HTMLElement>('[data-score]');
-      const elBest = root.querySelector<HTMLElement>('[data-best]');
+      function formatC(v: number): string {
+        return (v / C_PIXELS).toFixed(3) + 'c';
+      }
+
+      const elVelocity = root.querySelector<HTMLElement>('[data-velocity]');
       const elWave = root.querySelector<HTMLElement>('[data-wave]');
 
       function syncHud() {
-        if (elScore) elScore.textContent = String(score);
-        if (elBest) elBest.textContent = String(best);
-        if (elWave) elWave.textContent = String(wave);
-      }
-
-      function addScore(size: RockSize) {
-        score += ROCK_SCORE[size];
-        if (score > best) {
-          best = score;
-          try { localStorage.setItem(HIGH_KEY, String(best)); } catch {}
+        if (elVelocity) {
+          const speed = Math.hypot(ship.vx, ship.vy);
+          elVelocity.textContent = formatC(speed);
         }
-        syncHud();
+        if (elWave) elWave.textContent = String(wave);
       }
 
       const ROCK_RADIUS: Record<RockSize, number> = { L: 38, M: 22, S: 12 };
@@ -386,12 +375,7 @@
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) {
           e.preventDefault();
         }
-        if (k === 'Escape') {
-          e.preventDefault();
-          exitGame();
-          return;
-        }
-        if (k === 'p' || k === 'P') {
+        if (k === 'Escape' || k === 'p' || k === 'P') {
           e.preventDefault();
           togglePause();
           return;
@@ -457,11 +441,10 @@
         ctx.fillRect(0, 0, canvasW, canvasH);
       }
 
-      // -------- Loop --------
+      // -------- Physics constants --------
       const ROT_SPEED = 3.5;     // rad/sec
-      const THRUST = 200;        // px/sec^2
-      const DRAG = 0.995;        // per frame at 60fps approx
-      const MAX_SPEED = 350;     // px/sec
+      const THRUST = 200;        // px/sec^2  (= 0.001c per second of thrust)
+      const RECOIL = 30;         // px/sec impulse per shot, opposite of fire direction
 
       function update(dt: number) {
         if (ship.alive === false && !gameOver) {
@@ -478,17 +461,20 @@
         if (keys.has('ArrowUp') || touchActive('thrust')) {
           ship.vx += Math.cos(ship.angle) * THRUST * dt;
           ship.vy += Math.sin(ship.angle) * THRUST * dt;
-          const sp = Math.hypot(ship.vx, ship.vy);
-          if (sp > MAX_SPEED) {
-            ship.vx = (ship.vx / sp) * MAX_SPEED;
-            ship.vy = (ship.vy / sp) * MAX_SPEED;
-          }
         }
-        const dragF = Math.pow(DRAG, dt * 60);
-        ship.vx *= dragF;
-        ship.vy *= dragF;
+        // Vacuum: no drag. Velocity persists until thrust or recoil changes it.
         ship.x = wrap(ship.x + ship.vx * dt, canvasW);
         ship.y = wrap(ship.y + ship.vy * dt, canvasH);
+
+        // Track max velocity reached this run, and personal best.
+        const speedNow = Math.hypot(ship.vx, ship.vy);
+        if (speedNow > maxV) {
+          maxV = speedNow;
+          if (maxV > bestV) {
+            bestV = maxV;
+            try { localStorage.setItem(MAXV_KEY, String(bestV)); } catch {}
+          }
+        }
 
         // Fire
         fireCooldown = Math.max(0, fireCooldown - dt);
@@ -500,6 +486,9 @@
             vy: Math.sin(ship.angle) * BULLET_SPEED + ship.vy,
             life: BULLET_LIFE,
           });
+          // Recoil: each shot pushes the ship backwards along its current heading.
+          ship.vx -= Math.cos(ship.angle) * RECOIL;
+          ship.vy -= Math.sin(ship.angle) * RECOIL;
           fireCooldown = FIRE_COOLDOWN;
         }
 
@@ -529,7 +518,6 @@
             const r = rocks[j];
             if (circleHit(b.x, b.y, 2, r.x, r.y, r.radius)) {
               bullets.splice(i, 1);
-              addScore(r.size);
               const fragments = splitRock(r);
               rocks.splice(j, 1, ...fragments);
               break;
@@ -552,7 +540,6 @@
           wave += 1;
           const speedMul = Math.min(1 + 0.05 * (wave - 1), 2);
           spawnWave(2 + wave, speedMul);
-          syncHud();
         }
       }
 
@@ -594,6 +581,7 @@
         const dt = Math.min((t - lastT) / 1000, 0.05);
         lastT = t;
         update(dt);
+        syncHud();
         clear();
         drawBullets();
         drawRocks();
@@ -608,7 +596,7 @@
         ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         wave = 1;
-        score = 0;
+        maxV = 0;
         deathTimer = 0;
         resize();
         ship.x = canvasW / 2;
@@ -621,17 +609,12 @@
         rafId = requestAnimationFrame(frame);
       }
 
-      function stop() {
-        running = false;
-        cancelAnimationFrame(rafId);
-      }
-
       function triggerGameOver() {
         gameOver = true;
         if (elOverlay) {
           elOverlay.hidden = false;
           if (elOverlaySub) {
-            elOverlaySub.textContent = `Distance traveled: ${score} observations. Best: ${best}.`;
+            elOverlaySub.textContent = `Top speed: ${formatC(maxV)}. Personal best: ${formatC(bestV)}.`;
           }
           elRestart?.focus();
         }
@@ -650,7 +633,7 @@
         ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         wave = 1;
-        score = 0;
+        maxV = 0;
         deathTimer = 0;
         spawnWave(3, 1);
         syncHud();
@@ -659,20 +642,6 @@
           lastT = performance.now();
           rafId = requestAnimationFrame(frame);
         }
-      }
-
-      function exitGame() {
-        clearInputState();
-        stop();
-        gameOver = false;
-        paused = false;
-        if (elOverlay) elOverlay.hidden = true;
-        if (elPause) elPause.hidden = true;
-        if (elTouch) elTouch.hidden = true;
-        root.setAttribute('data-state', 'idle');
-        root.setAttribute('aria-hidden', 'true');
-        const wanderBtn = document.getElementById('wander-btn');
-        wanderBtn?.focus();
       }
 
       function togglePause() {
@@ -686,12 +655,6 @@
       }
 
       // -------- Events --------
-      document.addEventListener('anaximander:start', () => {
-        root.setAttribute('data-state', 'active');
-        root.removeAttribute('aria-hidden');
-        start();
-      });
-
       window.addEventListener('resize', () => {
         if (running) resize();
       });
@@ -704,7 +667,6 @@
       window.addEventListener('keyup', onKeyUp);
 
       elRestart?.addEventListener('click', restart);
-      elExit?.addEventListener('click', exitGame);
       elPause?.addEventListener('click', togglePause);
 
       const touchButtons = root.querySelectorAll<HTMLButtonElement>('.touch-btn');
@@ -719,7 +681,6 @@
         btn.addEventListener('pointerdown', (e) => {
           e.preventDefault();
           if (action === 'pause') { togglePause(); return; }
-          if (action === 'exit') { exitGame(); return; }
           btn.setPointerCapture(e.pointerId);
           touchHold[action]?.add(e.pointerId);
           setVisualActive(true);
@@ -732,6 +693,9 @@
         btn.addEventListener('pointerup', release);
         btn.addEventListener('pointercancel', release);
       });
+
+      // Auto-start: the game is always visible on /404, no click required.
+      start();
     }
   }
 </script>
