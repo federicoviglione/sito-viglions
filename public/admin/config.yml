@@ -3,8 +3,11 @@ backend:
   name: github
   repo: AlbyIanna/sito-viglions
   branch: main
+  base_url: https://auth.sveltia.app
 
-# Sveltia CMS: login via GitHub OAuth (Netlify public proxy, no setup needed)
+# Sveltia CMS auth: uses the official, free OAuth proxy hosted at auth.sveltia.app.
+# No need to register a GitHub OAuth app — the proxy handles the GitHub OAuth flow
+# and returns a short-lived token scoped to this repo.
 media_folder: public/uploads
 public_folder: /uploads
 
