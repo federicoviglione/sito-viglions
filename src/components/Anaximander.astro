@@ -34,12 +34,12 @@
     <div class="anaximander-pause" data-pause hidden>Paused — press P or tap</div>
     <div class="anaximander-touch" data-touch hidden>
       <div class="touch-left">
-        <button type="button" class="touch-btn" data-touch-action="rot-left" aria-label="Rotate left">↺</button>
-        <button type="button" class="touch-btn" data-touch-action="rot-right" aria-label="Rotate right">↻</button>
+        <button type="button" class="touch-btn touch-btn--fire" data-touch-action="fire" aria-label="Fire">FIRE</button>
       </div>
       <div class="touch-right">
-        <button type="button" class="touch-btn touch-btn--big" data-touch-action="thrust" aria-label="Thrust">▲</button>
-        <button type="button" class="touch-btn" data-touch-action="fire" aria-label="Fire">●</button>
+        <div class="touch-joystick" data-joystick>
+          <div class="joystick-knob" data-joystick-knob></div>
+        </div>
       </div>
       <div class="touch-top">
         <button type="button" class="touch-btn touch-btn--small" data-touch-action="pause" aria-label="Pause">‖</button>
@@ -242,7 +242,7 @@
     border: 1px solid var(--paper);
     background: rgba(21, 23, 26, 0.45);
     color: var(--paper);
-    font-size: 20px;
+    font-size: 28px;
     font-family: var(--font-body);
     cursor: pointer;
     touch-action: none;
@@ -258,16 +258,48 @@
   .touch-btn[data-active="1"] {
     background: rgba(246, 246, 244, 0.25);
   }
-  .touch-btn--big {
-    width: 72px;
-    height: 72px;
-    font-size: 26px;
+  .touch-btn--fire {
+    width: 88px;
+    height: 88px;
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 0.18em;
+    font-weight: 500;
   }
   .touch-btn--small {
-    width: 36px;
-    height: 36px;
-    font-size: 14px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
     border-radius: 50%;
+  }
+  .touch-joystick {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border: 1px solid var(--paper);
+    background: rgba(21, 23, 26, 0.45);
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .joystick-knob {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--paper);
+    background: rgba(246, 246, 244, 0.35);
+    border-radius: 50%;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: transform 80ms ease-out;
+  }
+  .touch-joystick[data-active="1"] .joystick-knob {
+    background: rgba(246, 246, 244, 0.55);
+    transition: none;
   }
   /* Visibility is controlled in JS by toggling [hidden]; CSS only styles. */
 </style>
@@ -305,15 +337,19 @@
       const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
       const touchHold: Record<string, Set<number>> = {
-        'rot-left': new Set(),
-        'rot-right': new Set(),
-        'thrust': new Set(),
         'fire': new Set(),
       };
 
       function touchActive(action: string): boolean {
         return (touchHold[action]?.size ?? 0) > 0;
       }
+
+      // Joystick state: vector in [-1, 1] for each axis. (0, 0) = centred / inactive.
+      let joystickX = 0;
+      let joystickY = 0;
+      let joystickPointer: number | null = null;
+      const elJoystick = root.querySelector<HTMLElement>('[data-joystick]');
+      const elJoystickKnob = root.querySelector<HTMLElement>('[data-joystick-knob]');
 
       // -------- Utilities --------
       function wrap(v: number, max: number): number {
@@ -729,9 +765,17 @@
         }
         if (gameOver) return;
 
-        if (keys.has('ArrowLeft') || touchActive('rot-left')) ship.angle -= ROT_SPEED * dt;
-        if (keys.has('ArrowRight') || touchActive('rot-right')) ship.angle += ROT_SPEED * dt;
-        if (keys.has('ArrowUp') || touchActive('thrust')) {
+        if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
+        if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
+
+        // Joystick steers AND accelerates: ship turns instantly to the joystick
+        // heading and thrusts along it with magnitude proportional to deflection.
+        const jMag = Math.hypot(joystickX, joystickY);
+        if (jMag > 0.15) {
+          ship.angle = Math.atan2(joystickY, joystickX);
+          ship.vx += Math.cos(ship.angle) * THRUST * jMag * dt;
+          ship.vy += Math.sin(ship.angle) * THRUST * jMag * dt;
+        } else if (keys.has('ArrowUp')) {
           ship.vx += Math.cos(ship.angle) * THRUST * dt;
           ship.vy += Math.sin(ship.angle) * THRUST * dt;
         }
@@ -925,10 +969,19 @@
         elRestart?.focus();
       }
 
+      function resetJoystick() {
+        joystickX = 0;
+        joystickY = 0;
+        joystickPointer = null;
+        if (elJoystickKnob) elJoystickKnob.style.transform = 'translate(-50%, -50%)';
+        if (elJoystick) elJoystick.setAttribute('data-active', '0');
+      }
+
       function clearInputState() {
         keys.clear();
         for (const set of Object.values(touchHold)) set.clear();
         fireCooldown = 0;
+        resetJoystick();
       }
 
       function restart() {
@@ -1001,6 +1054,47 @@
         btn.addEventListener('pointerup', release);
         btn.addEventListener('pointercancel', release);
       });
+
+      // Joystick: drag the knob; release returns to centre.
+      if (elJoystick && elJoystickKnob) {
+        const j = elJoystick;
+        const knob = elJoystickKnob;
+
+        function updateKnob(clientX: number, clientY: number) {
+          const rect = j.getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const maxR = rect.width / 2;
+          let dx = clientX - cx;
+          let dy = clientY - cy;
+          const len = Math.hypot(dx, dy);
+          if (len > maxR) {
+            dx = (dx / len) * maxR;
+            dy = (dy / len) * maxR;
+          }
+          joystickX = dx / maxR;
+          joystickY = dy / maxR;
+          knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+        }
+
+        j.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          j.setPointerCapture(e.pointerId);
+          joystickPointer = e.pointerId;
+          j.setAttribute('data-active', '1');
+          updateKnob(e.clientX, e.clientY);
+        });
+        j.addEventListener('pointermove', (e) => {
+          if (e.pointerId !== joystickPointer) return;
+          updateKnob(e.clientX, e.clientY);
+        });
+        const releaseJ = (e: PointerEvent) => {
+          if (e.pointerId !== joystickPointer) return;
+          resetJoystick();
+        };
+        j.addEventListener('pointerup', releaseJ);
+        j.addEventListener('pointercancel', releaseJ);
+      }
 
       // Auto-start: the game is always visible on /404, no click required.
       start();
