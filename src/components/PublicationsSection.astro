@@ -1,0 +1,52 @@
+---
+import { getCollection } from 'astro:content';
+import PublicationItem from './PublicationItem.astro';
+
+const all = await getCollection('publications');
+
+const sortByYearDesc = (a: typeof all[number], b: typeof all[number]) => {
+  if (a.data.year !== b.data.year) return b.data.year - a.data.year;
+  return (a.data.order ?? 99) - (b.data.order ?? 99);
+};
+
+const groups = [
+  { label: 'Published', status: ['published'] },
+  { label: 'Forthcoming', status: ['forthcoming', 'under-contract'] },
+  { label: 'Under review', status: ['under-review'] },
+  { label: 'In preparation', status: ['in-preparation'] },
+];
+
+const visible = groups
+  .map(g => ({ ...g, items: all.filter(p => g.status.includes(p.data.status)).sort(sortByYearDesc) }))
+  .filter(g => g.items.length > 0);
+---
+{visible.length > 0 && (
+  <section id="publications" class="publications container">
+    <header class="section-head">
+      <div class="label">Publications</div>
+      <h2 class="section-title">Papers, chapters, and books</h2>
+    </header>
+    {visible.map(g => (
+      <div class="pub-group">
+        <h3 class="group-label">{g.label}</h3>
+        {g.items.map(p => <PublicationItem {...p.data} />)}
+      </div>
+    ))}
+  </section>
+)}
+
+<style>
+  .publications { padding-block: var(--space-7); }
+  .section-head { margin-bottom: var(--space-4); }
+  .section-head .label { margin-bottom: var(--space-2); }
+  .pub-group { margin-bottom: var(--space-6); }
+  .pub-group:last-child { margin-bottom: 0; }
+  .group-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: var(--space-2);
+  }
+  .pub-group > :global(article.pub:last-child) { border-bottom: 1px solid var(--rule); }
+</style>
