@@ -1,0 +1,71 @@
+---
+interface Props {
+  title: string;
+  venue: string;
+  location?: string;
+  date: Date;
+  type: string;
+  url?: string;
+  slides_url?: string;
+  video_url?: string;
+  abstract?: string;
+}
+const { title, venue, location, date, type, url, slides_url, video_url, abstract } = Astro.props;
+const fmt = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+const isInvited = type === 'invited' || type === 'keynote';
+---
+<article class="talk">
+  <div class="talk-row">
+    <div class="talk-main">
+      <h3 class="talk-title">
+        {url ? <a href={url} target="_blank" rel="noopener noreferrer">{title}</a> : title}
+      </h3>
+      <p class="talk-meta">
+        <span>{venue}</span>{location ? <> · <span>{location}</span></> : null} · <span>{fmt}</span>
+      </p>
+    </div>
+    <div class="talk-side">
+      <span class:list={['type-chip', { invited: isInvited }]}>{type}</span>
+      <ul class="links">
+        {slides_url && <li><a href={slides_url} target="_blank" rel="noopener noreferrer">Slides</a></li>}
+        {video_url && <li><a href={video_url} target="_blank" rel="noopener noreferrer">Video</a></li>}
+      </ul>
+    </div>
+  </div>
+  {abstract && (
+    <details class="abstract-toggle">
+      <summary>Abstract</summary>
+      <p>{abstract}</p>
+    </details>
+  )}
+</article>
+
+<style>
+  .talk { padding-block: var(--space-4); border-top: 1px solid var(--rule); }
+  .talk-row { display: flex; justify-content: space-between; gap: var(--space-4); align-items: start; }
+  .talk-title { font-size: var(--fs-base); font-weight: 500; margin-bottom: var(--space-1); }
+  .talk-title a { color: var(--ink); border-bottom: 1px dotted var(--rule); }
+  .talk-title a:hover { color: var(--accent); border-color: var(--accent); }
+  .talk-meta { font-size: var(--fs-sm); color: var(--muted); }
+  .talk-side { text-align: right; display: flex; flex-direction: column; gap: var(--space-2); align-items: flex-end; }
+  .type-chip {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border: 1px solid var(--rule);
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+  .type-chip.invited { color: var(--accent); border-color: var(--accent); }
+  .links { list-style: none; display: flex; gap: var(--space-3); font-size: var(--fs-xs); }
+  .links a { color: var(--accent); }
+  .abstract-toggle { margin-top: var(--space-2); font-size: var(--fs-sm); }
+  .abstract-toggle summary { color: var(--accent); cursor: pointer; font-size: var(--fs-xs); }
+  .abstract-toggle p { margin-top: var(--space-2); line-height: 1.5; max-width: var(--max-prose); }
+
+  @media (max-width: 600px) {
+    .talk-row { flex-direction: column; }
+    .talk-side { align-items: flex-start; text-align: left; }
+  }
+</style>
