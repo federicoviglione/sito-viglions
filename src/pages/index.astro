@@ -48,6 +48,7 @@ const social = {
 <Layout title={`${site.data.name} — ${site.data.role}`}>
   <Nav items={navItems} siteName={site.data.name} />
 
+  <main>
   <Hero
     name={site.data.name}
     role={site.data.role}
@@ -85,6 +86,7 @@ const social = {
   <OrganizedEventsSection />
 
   <Contact social={social} cv_pdf={site.data.cv_pdf} />
+  </main>
 
   <Footer siteName={site.data.name} />
 </Layout>
