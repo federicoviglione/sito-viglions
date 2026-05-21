@@ -4,7 +4,7 @@
 ---
 
 <div class="anaximander" data-state="idle" aria-hidden="true">
-  <canvas class="anaximander-canvas"></canvas>
+  <canvas class="anaximander-canvas" width="720" height="450"></canvas>
 </div>
 
 <style>
@@ -30,8 +30,7 @@
   if (root) {
     document.addEventListener('anaximander:start', () => {
       root.setAttribute('data-state', 'active');
-      root.setAttribute('aria-hidden', 'false');
-      console.log('[anaximander] start');
+      root.removeAttribute('aria-hidden');
     });
   }
 </script>
