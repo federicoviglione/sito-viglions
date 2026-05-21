@@ -1,0 +1,21 @@
+{
+  "name": "sito-viglions",
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "fetch-fonts": "node scripts/fetch-fonts.mjs",
+    "postinstall": "node scripts/fetch-fonts.mjs"
+  },
+  "dependencies": {
+    "astro": "^5.7.0",
+    "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.7.3"
+  }
+}
