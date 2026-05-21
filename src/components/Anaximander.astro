@@ -31,18 +31,14 @@
         <button type="button" data-action="restart">Restart</button>
       </div>
     </div>
-    <div class="anaximander-pause" data-pause hidden>Paused — press P or tap</div>
     <div class="anaximander-touch" data-touch hidden>
       <div class="touch-left">
-        <button type="button" class="touch-btn touch-btn--fire" data-touch-action="fire" aria-label="Fire">FIRE</button>
+        <button type="button" class="touch-btn touch-btn--fire" data-touch-action="fire" aria-label="Fire">●</button>
       </div>
       <div class="touch-right">
         <div class="touch-joystick" data-joystick>
           <div class="joystick-knob" data-joystick-knob></div>
         </div>
-      </div>
-      <div class="touch-top">
-        <button type="button" class="touch-btn touch-btn--small" data-touch-action="pause" aria-label="Pause">‖</button>
       </div>
     </div>
   </div>
@@ -195,19 +191,6 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
-  .anaximander-pause {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: var(--paper);
-    font-family: var(--font-display);
-    font-size: var(--fs-lg);
-    background: rgba(21, 23, 26, 0.55);
-  }
-  .anaximander-pause[hidden] { display: none; }
-
   .anaximander-touch {
     position: absolute;
     inset: 0;
@@ -215,8 +198,7 @@
   }
   .anaximander-touch[hidden] { display: none; }
   .anaximander-touch .touch-left,
-  .anaximander-touch .touch-right,
-  .anaximander-touch .touch-top {
+  .anaximander-touch .touch-right {
     position: absolute;
     display: flex;
     gap: var(--space-3);
@@ -230,11 +212,6 @@
     right: var(--space-3);
     bottom: var(--space-3);
     align-items: flex-end;
-  }
-  .anaximander-touch .touch-top {
-    top: var(--space-3);
-    right: var(--space-3);
-    gap: var(--space-2);
   }
   .touch-btn {
     width: 56px;
@@ -261,16 +238,7 @@
   .touch-btn--fire {
     width: 88px;
     height: 88px;
-    font-family: var(--font-display);
-    font-size: 18px;
-    letter-spacing: 0.18em;
-    font-weight: 500;
-  }
-  .touch-btn--small {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-    border-radius: 50%;
+    font-size: 42px;
   }
   .touch-joystick {
     position: relative;
@@ -323,7 +291,6 @@
       let canvasW = 0;
       let canvasH = 0;
       let deathTimer = 0;
-      let paused = false;
       let gameOver = false;
       const elOverlay = root.querySelector<HTMLElement>('[data-overlay]');
       const elOverlayTopspeed = root.querySelector<HTMLElement>('[data-overlay-topspeed]');
@@ -331,7 +298,6 @@
       const elOverlayDistance = root.querySelector<HTMLElement>('[data-overlay-distance]');
       const elOverlayReference = root.querySelector<HTMLElement>('[data-overlay-reference]');
       const elOverlayBest = root.querySelector<HTMLElement>('[data-overlay-best]');
-      const elPause = root.querySelector<HTMLElement>('[data-pause]');
       const elRestart = root.querySelector<HTMLButtonElement>('[data-action="restart"]');
       const elTouch = root.querySelector<HTMLElement>('[data-touch]');
       const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
@@ -603,11 +569,6 @@
         const k = e.key;
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) {
           e.preventDefault();
-        }
-        if (k === 'Escape' || k === 'p' || k === 'P') {
-          e.preventDefault();
-          togglePause();
-          return;
         }
         keys.add(k);
       }
@@ -897,7 +858,6 @@
 
       function frame(t: number) {
         if (!running) return;
-        if (paused) return;
         const dt = Math.min((t - lastT) / 1000, 0.05);
         lastT = t;
         update(dt);
@@ -1005,16 +965,6 @@
         }
       }
 
-      function togglePause() {
-        if (!running || gameOver) return;
-        paused = !paused;
-        if (elPause) elPause.hidden = !paused;
-        if (!paused) {
-          lastT = performance.now();
-          rafId = requestAnimationFrame(frame);
-        }
-      }
-
       // -------- Events --------
       window.addEventListener('resize', () => {
         if (running) resize();
@@ -1028,7 +978,6 @@
       window.addEventListener('keyup', onKeyUp);
 
       elRestart?.addEventListener('click', restart);
-      elPause?.addEventListener('click', togglePause);
 
       const touchButtons = root.querySelectorAll<HTMLButtonElement>('.touch-btn');
       touchButtons.forEach((btn) => {
@@ -1041,7 +990,6 @@
 
         btn.addEventListener('pointerdown', (e) => {
           e.preventDefault();
-          if (action === 'pause') { togglePause(); return; }
           btn.setPointerCapture(e.pointerId);
           touchHold[action]?.add(e.pointerId);
           setVisualActive(true);
