@@ -1,0 +1,43 @@
+---
+interface Props {
+  label: string;
+}
+const { label } = Astro.props;
+---
+<div class="block">
+  <div class="block-label">{label}</div>
+  <div class="block-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .block {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+    border-top: 1px solid var(--rule);
+  }
+  .block:last-child { border-bottom: 1px solid var(--rule); }
+  .block-label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    padding-top: 4px;
+  }
+  .block-content {
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+  }
+  .block-content :global(ul) { list-style: none; }
+  .block-content :global(li) { margin-bottom: var(--space-2); }
+  .block-content :global(li:last-child) { margin-bottom: 0; }
+  .block-content :global(em) { color: var(--muted); font-style: italic; }
+  .block-content :global(.period) { color: var(--muted); font-variant-numeric: tabular-nums; margin-right: var(--space-2); }
+
+  @media (max-width: 720px) {
+    .block { grid-template-columns: 1fr; gap: var(--space-2); }
+  }
+</style>
