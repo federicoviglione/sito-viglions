@@ -1,0 +1,72 @@
+---
+import { getCollection } from 'astro:content';
+
+const all = await getCollection('news');
+const now = new Date();
+
+function withinDays(date: Date, days: number) {
+  const diff = (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24);
+  return diff >= -days; // date in the future or within `days` in the past
+}
+
+const visible = all.filter(e => {
+  if (e.data.pinned) return true;
+  const d = e.data.date as Date;
+  switch (e.data.kind) {
+    case 'upcoming': return d.getTime() >= now.getTime() - 30 * 24 * 60 * 60 * 1000;
+    case 'recent':
+    case 'visit':   return withinDays(d, 365);
+    case 'award':   return withinDays(d, 730);
+    default: return false;
+  }
+});
+
+const sorted = visible.sort((a, b) => {
+  if (a.data.pinned !== b.data.pinned) return a.data.pinned ? -1 : 1;
+  return (b.data.date as Date).getTime() - (a.data.date as Date).getTime();
+});
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+---
+{sorted.length > 0 && (
+  <section id="news" class="news container">
+    <header class="section-head">
+      <div class="label">News</div>
+      <h2 class="section-title">Recent &amp; upcoming</h2>
+    </header>
+    <ul class="news-list">
+      {sorted.map(e => (
+        <li class:list={['news-item', { pinned: e.data.pinned }]}>
+          <div class="news-meta">
+            <span class="date">{fmtDate(e.data.date as Date)}</span>
+            <span class="kind">{e.data.kind}</span>
+          </div>
+          <h3 class="news-title">
+            {e.data.url ? <a href={e.data.url} target="_blank" rel="noopener noreferrer">{e.data.title}</a> : e.data.title}
+          </h3>
+          <p class="news-summary">{e.data.summary}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<style>
+  .news { padding-block: var(--space-7); }
+  .section-head { margin-bottom: var(--space-4); }
+  .section-head .label { margin-bottom: var(--space-2); }
+  .news-list { list-style: none; display: grid; gap: var(--space-2); }
+  .news-item {
+    padding: var(--space-4) var(--space-5);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    background: var(--surface);
+  }
+  .news-item.pinned { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 20%, transparent); }
+  .news-meta { display: flex; gap: var(--space-3); font-size: var(--fs-xs); color: var(--muted); margin-bottom: var(--space-2); }
+  .news-meta .kind { text-transform: uppercase; letter-spacing: 0.1em; }
+  .news-title { font-size: var(--fs-base); font-weight: 500; margin-bottom: var(--space-1); }
+  .news-summary { font-size: var(--fs-sm); color: var(--ink); line-height: 1.5; max-width: var(--max-prose); }
+</style>
