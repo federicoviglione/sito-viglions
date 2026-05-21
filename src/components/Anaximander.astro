@@ -359,6 +359,17 @@
       };
       const debris: Debris[] = [];
 
+      // Shards: short-lived line segments from broken rocks (purely visual).
+      type Shard = {
+        x: number; y: number;
+        vx: number; vy: number;
+        angle: number; va: number;
+        len: number;
+        life: number;
+        maxLife: number;
+      };
+      const shards: Shard[] = [];
+
       type RockSize = 'L' | 'M' | 'S';
       type Rock = {
         x: number; y: number;
@@ -498,6 +509,45 @@
         return [];
       }
 
+      function spawnShards(r: Rock) {
+        // More shards from bigger rocks. Pure visual; no collision interaction.
+        const count = r.size === 'L' ? 6 : r.size === 'M' ? 4 : 3;
+        const baseLen = r.radius * 0.3;
+        for (let i = 0; i < count; i++) {
+          const dir = Math.random() * Math.PI * 2;
+          const speed = 40 + Math.random() * 80;
+          const lifeS = 0.5 + Math.random() * 0.5;
+          shards.push({
+            x: r.x,
+            y: r.y,
+            vx: Math.cos(dir) * speed,
+            vy: Math.sin(dir) * speed,
+            angle: Math.random() * Math.PI * 2,
+            va: (Math.random() - 0.5) * 8,
+            len: baseLen * (0.7 + Math.random() * 0.6),
+            life: lifeS,
+            maxLife: lifeS,
+          });
+        }
+      }
+
+      function drawShards() {
+        if (shards.length === 0) return;
+        ctx.lineWidth = 1;
+        for (const s of shards) {
+          const alpha = (s.life / s.maxLife) * 0.8;
+          ctx.strokeStyle = `rgba(246, 246, 244, ${alpha})`;
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.rotate(s.angle);
+          ctx.beginPath();
+          ctx.moveTo(-s.len / 2, 0);
+          ctx.lineTo(s.len / 2, 0);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
       function spawnWave(n: number, speedMul: number) {
         rocks.length = 0;
         for (let i = 0; i < n; i++) {
@@ -556,6 +606,10 @@
           for (const d of debris) {
             d.x *= sx; d.y *= sy;
             d.vx *= sx; d.vy *= sy;
+          }
+          for (const s of shards) {
+            s.x *= sx; s.y *= sy;
+            s.vx *= sx; s.vy *= sy;
           }
         } else if (!running) {
           ship.x = w / 2;
@@ -653,6 +707,18 @@
           d.y += d.vy * dt;
           d.angle += d.va * dt;
         }
+        // Shards drift and fade; remove when life expires.
+        for (let i = shards.length - 1; i >= 0; i--) {
+          const s = shards[i];
+          s.life -= dt;
+          if (s.life <= 0) {
+            shards.splice(i, 1);
+            continue;
+          }
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          s.angle += s.va * dt;
+        }
 
         if (ship.alive === false && !gameOver) {
           deathTimer += dt;
@@ -726,6 +792,7 @@
             const r = rocks[j];
             if (circleHit(b.x, b.y, 2, r.x, r.y, r.radius)) {
               bullets.splice(i, 1);
+              spawnShards(r);
               const fragments = splitRock(r);
               rocks.splice(j, 1, ...fragments);
               break;
@@ -794,6 +861,7 @@
         clear();
         drawBullets();
         drawRocks();
+        drawShards();
         drawDebris();
         drawShip(ship);
         if (!gameOver) {
@@ -806,6 +874,7 @@
         ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         debris.length = 0;
+        shards.length = 0;
         wave = 1;
         maxV = 0;
         distancePx = 0;
@@ -869,6 +938,7 @@
         ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         debris.length = 0;
+        shards.length = 0;
         wave = 1;
         maxV = 0;
         distancePx = 0;
