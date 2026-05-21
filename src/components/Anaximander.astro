@@ -238,6 +238,17 @@
       const elTouch = root.querySelector<HTMLElement>('[data-touch]');
       const isTouchDevice = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
+      const touchHold: Record<string, Set<number>> = {
+        'rot-left': new Set(),
+        'rot-right': new Set(),
+        'thrust': new Set(),
+        'fire': new Set(),
+      };
+
+      function touchActive(action: string): boolean {
+        return (touchHold[action]?.size ?? 0) > 0;
+      }
+
       // -------- Utilities --------
       function wrap(v: number, max: number): number {
         if (v < 0) return v + max;
@@ -435,9 +446,9 @@
         }
         if (gameOver) return;
 
-        if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
-        if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
-        if (keys.has('ArrowUp')) {
+        if (keys.has('ArrowLeft') || touchActive('rot-left')) ship.angle -= ROT_SPEED * dt;
+        if (keys.has('ArrowRight') || touchActive('rot-right')) ship.angle += ROT_SPEED * dt;
+        if (keys.has('ArrowUp') || touchActive('thrust')) {
           ship.vx += Math.cos(ship.angle) * THRUST * dt;
           ship.vy += Math.sin(ship.angle) * THRUST * dt;
           const sp = Math.hypot(ship.vx, ship.vy);
@@ -454,7 +465,7 @@
 
         // Fire
         fireCooldown = Math.max(0, fireCooldown - dt);
-        if (keys.has(' ') && fireCooldown === 0) {
+        if ((keys.has(' ') || touchActive('fire')) && fireCooldown === 0) {
           bullets.push({
             x: ship.x + Math.cos(ship.angle) * 12,
             y: ship.y + Math.sin(ship.angle) * 12,
@@ -656,6 +667,33 @@
       elRestart?.addEventListener('click', restart);
       elExit?.addEventListener('click', exitGame);
       elPause?.addEventListener('click', togglePause);
+
+      const touchButtons = root.querySelectorAll<HTMLButtonElement>('.touch-btn');
+      touchButtons.forEach((btn) => {
+        const action = btn.dataset.touchAction;
+        if (!action) return;
+
+        const setVisualActive = (on: boolean) => {
+          btn.setAttribute('data-active', on ? '1' : '0');
+        };
+
+        btn.addEventListener('pointerdown', (e) => {
+          e.preventDefault();
+          btn.setPointerCapture(e.pointerId);
+          if (action === 'pause') { togglePause(); return; }
+          if (action === 'exit') { exitGame(); return; }
+          touchHold[action]?.add(e.pointerId);
+          setVisualActive(true);
+        });
+
+        const release = (e: PointerEvent) => {
+          touchHold[action]?.delete(e.pointerId);
+          if (!touchActive(action)) setVisualActive(false);
+        };
+        btn.addEventListener('pointerup', release);
+        btn.addEventListener('pointercancel', release);
+        btn.addEventListener('pointerleave', release);
+      });
     }
   }
 </script>
