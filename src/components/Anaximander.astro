@@ -417,8 +417,15 @@
           const sx = w / canvasW;
           const sy = h / canvasH;
           ship.x *= sx; ship.y *= sy;
-          for (const b of bullets) { b.x *= sx; b.y *= sy; }
-          for (const r of rocks) { r.x *= sx; r.y *= sy; }
+          ship.vx *= sx; ship.vy *= sy;
+          for (const b of bullets) {
+            b.x *= sx; b.y *= sy;
+            b.vx *= sx; b.vy *= sy;
+          }
+          for (const r of rocks) {
+            r.x *= sx; r.y *= sy;
+            r.vx *= sx; r.vy *= sy;
+          }
         } else if (!running) {
           ship.x = w / 2;
           ship.y = h / 2;
