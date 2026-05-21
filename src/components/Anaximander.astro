@@ -36,13 +36,14 @@
       console.warn('[anaximander] canvas 2d context not available');
     } else {
       // -------- Game state --------
-      type Ship = { x: number; y: number; vx: number; vy: number; angle: number };
-      let ship: Ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2 };
+      type Ship = { x: number; y: number; vx: number; vy: number; angle: number; alive?: boolean };
+      let ship: Ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
       let running = false;
       let lastT = 0;
       let rafId = 0;
       let canvasW = 0;
       let canvasH = 0;
+      let deathTimer = 0;
 
       // -------- Utilities --------
       function wrap(v: number, max: number): number {
@@ -56,6 +57,17 @@
         console.assert(wrap(5, 10) === 5, 'wrap inside');
         console.assert(wrap(-1, 10) === 9, 'wrap negative');
         console.assert(wrap(11, 10) === 1, 'wrap over');
+      }
+
+      function circleHit(ax: number, ay: number, ar: number, bx: number, by: number, br: number): boolean {
+        const dx = ax - bx, dy = ay - by;
+        return dx * dx + dy * dy <= (ar + br) * (ar + br);
+      }
+
+      if (import.meta.env.DEV) {
+        console.assert(circleHit(0, 0, 5, 3, 0, 5) === true, 'circleHit overlap');
+        console.assert(circleHit(0, 0, 1, 100, 0, 1) === false, 'circleHit far');
+        console.assert(circleHit(0, 0, 1, 2, 0, 1) === true, 'circleHit touch');
       }
 
       const keys = new Set<string>();
@@ -108,6 +120,12 @@
           radius: ROCK_RADIUS[size],
           shape: makeRockShape(),
         };
+      }
+
+      function splitRock(r: Rock): Rock[] {
+        if (r.size === 'L') return [makeRock(r.x, r.y, 'M'), makeRock(r.x, r.y, 'M')];
+        if (r.size === 'M') return [makeRock(r.x, r.y, 'S'), makeRock(r.x, r.y, 'S')];
+        return [];
       }
 
       function spawnWave(n: number, speedMul: number) {
@@ -180,6 +198,17 @@
       const MAX_SPEED = 350;     // px/sec
 
       function update(dt: number) {
+        if (ship.alive === false) {
+          deathTimer += dt;
+          if (deathTimer > 1.5) {
+            deathTimer = 0;
+            ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
+            spawnWave(3, 1);
+            wave = 1;
+          }
+          return;
+        }
+
         if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
         if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
         if (keys.has('ArrowUp')) {
@@ -228,6 +257,30 @@
           r.y = wrap(r.y + r.vy * dt, canvasH);
           r.angle += r.va * dt;
         }
+
+        // Bullet -> Rock collisions
+        for (let i = bullets.length - 1; i >= 0; i--) {
+          const b = bullets[i];
+          for (let j = rocks.length - 1; j >= 0; j--) {
+            const r = rocks[j];
+            if (circleHit(b.x, b.y, 2, r.x, r.y, r.radius)) {
+              bullets.splice(i, 1);
+              const fragments = splitRock(r);
+              rocks.splice(j, 1, ...fragments);
+              break;
+            }
+          }
+        }
+
+        // Ship -> Rock collisions
+        if (ship.alive !== false) {
+          for (const r of rocks) {
+            if (circleHit(ship.x, ship.y, 6, r.x, r.y, r.radius)) {
+              ship.alive = false;
+              break;
+            }
+          }
+        }
       }
 
       function drawBullets() {
@@ -270,15 +323,16 @@
         clear();
         drawBullets();
         drawRocks();
-        drawShip(ship);
+        if (ship.alive !== false) drawShip(ship);
         rafId = requestAnimationFrame(frame);
       }
 
       function start() {
         if (running) return;
-        ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2 };
+        ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
         wave = 1;
+        deathTimer = 0;
         resize();
         ship.x = canvasW / 2;
         ship.y = canvasH / 2;
