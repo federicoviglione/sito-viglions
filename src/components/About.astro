@@ -1,0 +1,93 @@
+---
+import AboutFactBlock from './AboutFactBlock.astro';
+
+interface Affiliation { period: string; role: string; institution: string; location?: string; current?: boolean; }
+interface Education { period: string; degree: string; institution: string; location?: string; thesis_title?: string; supervisors?: string; grade?: string; }
+interface EditorialRole { journal: string; role: string; url?: string; }
+interface Membership { name: string; role?: string; period?: string; url?: string; }
+interface ProjectMembership { name: string; period: string; role?: string; url?: string; }
+
+interface Props {
+  affiliations?: Affiliation[];
+  education?: Education[];
+  editorial_roles?: EditorialRole[];
+  memberships?: Membership[];
+  project_memberships?: ProjectMembership[];
+  peer_review_for?: string[];
+}
+
+const { affiliations, education, editorial_roles, memberships, project_memberships, peer_review_for } = Astro.props;
+---
+
+<div class="facts">
+  {affiliations && affiliations.length > 0 && (
+    <AboutFactBlock label="Academic positions">
+      <ul>
+        {affiliations.map(a => (
+          <li>
+            <span class="period">{a.period}</span>
+            {a.role}, {a.institution}{a.location ? `, ${a.location}` : ''}
+          </li>
+        ))}
+      </ul>
+    </AboutFactBlock>
+  )}
+
+  {education && education.length > 0 && (
+    <AboutFactBlock label="Education">
+      <ul>
+        {education.map(e => (
+          <li>
+            <span class="period">{e.period}</span>
+            {e.degree}, {e.institution}{e.location ? `, ${e.location}` : ''}
+            {e.thesis_title && <div><em>"{e.thesis_title}"</em>{e.supervisors ? ` — Supervisors: ${e.supervisors}` : ''}{e.grade ? ` (${e.grade})` : ''}</div>}
+          </li>
+        ))}
+      </ul>
+    </AboutFactBlock>
+  )}
+
+  {editorial_roles && editorial_roles.length > 0 && (
+    <AboutFactBlock label="Editorial roles">
+      <ul>
+        {editorial_roles.map(r => (
+          <li>{r.role}, {r.url ? <a href={r.url}><em>{r.journal}</em></a> : <em>{r.journal}</em>}</li>
+        ))}
+      </ul>
+    </AboutFactBlock>
+  )}
+
+  {memberships && memberships.length > 0 && (
+    <AboutFactBlock label="Memberships">
+      <ul>
+        {memberships.map(m => (
+          <li>
+            {m.period && <span class="period">{m.period}</span>}
+            {m.url ? <a href={m.url}>{m.name}</a> : m.name}
+            {m.role ? `, ${m.role}` : ''}
+          </li>
+        ))}
+      </ul>
+    </AboutFactBlock>
+  )}
+
+  {project_memberships && project_memberships.length > 0 && (
+    <AboutFactBlock label="Project memberships">
+      <ul>
+        {project_memberships.map(p => (
+          <li>
+            <span class="period">{p.period}</span>
+            {p.url ? <a href={p.url}>{p.name}</a> : p.name}
+            {p.role ? `, ${p.role}` : ''}
+          </li>
+        ))}
+      </ul>
+    </AboutFactBlock>
+  )}
+
+  {peer_review_for && peer_review_for.length > 0 && (
+    <AboutFactBlock label="Peer review">
+      <p>Reviewer for {peer_review_for.map((j, i) => (<><em>{j}</em>{i < peer_review_for.length - 1 ? ', ' : '.'}</>))}</p>
+    </AboutFactBlock>
+  )}
+</div>
