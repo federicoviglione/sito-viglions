@@ -16,14 +16,15 @@ Il sito di Federico Viglione è un biglietto da visita accademico, sobrio, edito
 3. Nessuna dipendenza JS aggiuntiva (Astro 5 statico, niente island framework).
 4. Il game è opt-in: nessun visitatore lo incontra contro la sua volontà.
 5. Riferimento sottile al lavoro filosofico di Federico (cosmologia, tempo, "Awakening Universe Hypothesis").
+6. Giocabile sia da desktop (tastiera) sia da mobile (touch).
 
 ## Non-goals
 
 - Multiplayer, leaderboard online, account, backend.
 - Audio nel MVP (eventuale iter successiva, mute-by-default).
-- Controlli touch nel MVP (eventuale iter successiva).
 - Effetti grafici elaborati, particle storms, screen shake.
 - Promuoverlo: resta un easter egg che chi sbaglia URL può scoprire.
+- Gamepad / API device-orientation / tilt (mobile usa solo touch).
 
 ## Approach — Recap delle alternative considerate
 
@@ -98,7 +99,7 @@ Tre parti, nello stesso file (pattern Astro standard):
 
 ### Controlli
 
-**Desktop**:
+**Desktop (tastiera)**:
 - `←` / `→` rotate
 - `↑` thrust
 - `space` fire (cooldown 150ms)
@@ -106,9 +107,38 @@ Tre parti, nello stesso file (pattern Astro standard):
 - `H` o `?` toggle help
 - `Esc` exit (torna a 404 originale)
 
-**Mobile**: MVP non supportato. Il pulsante "or wander the cosmos →" su touch-only device renderizza un messaggio inline: "Use a desktop with a keyboard to play". Niente canvas inizializzato, niente JS eseguito oltre il detect.
+**Mobile (touch)**:
 
-Detect touch-only: `window.matchMedia('(hover: none) and (pointer: coarse)').matches` — euristica standard, sufficiente per MVP.
+On-screen virtual buttons sovrapposti al canvas, semi-trasparenti, palette del sito (ink outline su `--paper` con `opacity: 0.6`).
+
+Layout (sia portrait che landscape):
+- **Sinistra in basso**: due bottoni rotate `↺` e `↻`, affiancati (gruppo "steer")
+- **Destra in basso**: bottone `▲` thrust (più grande) + bottone `•` fire (subito sopra o accanto)
+- **In alto a destra**: bottoni piccoli `‖` pause e `✕` exit
+
+Dimensioni: min 56×56px per ogni bottone, target zone 64×64px. Distanza tra gruppi destro/sinistro: almeno `clamp(80px, 30vw, 200px)` per evitare conflitto col pollice opposto.
+
+Comportamento touch:
+- `touchstart` su rotate o thrust = attiva l'input continuo (azione mantenuta fino a `touchend` o `touchcancel`)
+- `touchstart` su fire = singolo shot, rispetta lo stesso cooldown 150ms del desktop. Tieni premuto = fire continuo (auto-repeat al cooldown).
+- `e.preventDefault()` su tutti i listener touch dei bottoni per evitare scroll/zoom involontari.
+- CSS `touch-action: none` sui bottoni del game per disabilitare i gesti di sistema.
+- Multi-touch: due dita simultaneamente (es. rotate + thrust) devono funzionare. Tieni un `Set<pointerId>` per ogni bottone attivo.
+
+Detect touch device: `window.matchMedia('(hover: none) and (pointer: coarse)').matches`.
+- Se true → mostra virtual buttons, nascondi pannello istruzioni tastiera.
+- Se false → nascondi virtual buttons, mostra istruzioni tastiera.
+- Su hybrid (laptop touch): se sia `pointer: coarse` che `pointer: fine` matchano? `matchMedia` riporta solo il primario; in quei casi rari, mostra istruzioni tastiera ma lascia i listener touch attivi sul canvas (i bottoni virtuali no, per non sporcare la UI desktop).
+
+Canvas size su mobile:
+- Portrait: `aspect-ratio: 3 / 4`, `width: min(100vw - 32px, 480px)`
+- Landscape: `aspect-ratio: 16 / 10`, `width: min(100vw - 32px, 720px)`, `max-height: 70vh`
+- I bottoni virtuali sono `position: absolute` sopra il canvas (non rubano area gioco).
+
+Performance mobile:
+- Canvas `width/height` attributes = layout px × `devicePixelRatio` (cap a 2 per evitare overhead su display HiDPI estremi).
+- Particle cap: 80 desktop, **40 mobile**.
+- Cooldown e velocità invariati: l'esperienza di gioco è la stessa, solo l'input cambia.
 
 ### Accessibilità
 
@@ -134,14 +164,19 @@ Detect touch-only: `window.matchMedia('(hover: none) and (pointer: coarse)').mat
 
 ### Testing
 
-- Smoke manuale: aprire `/404`, cliccare "wander the cosmos", verificare:
+- Smoke manuale desktop: aprire `/404`, cliccare "wander the cosmos", verificare:
   - Il canvas appare con palette corretta
   - Tasti `←/→/↑/space` rispondono
   - Asteroid si splittano correttamente, score sale, high score persiste dopo refresh
-  - Esc esce e ripristina la 404 originale
+  - `Esc` esce e ripristina la 404 originale
   - `prefers-reduced-motion` mostra disclaimer
-  - Touch device mostra messaggio fallback
-- Browser target: ultimi 2 versioni di Chrome, Firefox, Safari. No IE.
+- Smoke manuale mobile (iPhone Safari + Android Chrome via DevTools device emulation, e almeno una verifica su device reale):
+  - Bottoni virtuali appaiono, hit zone confortevole per il pollice
+  - Rotate + thrust simultanei funzionano (multi-touch)
+  - Niente scroll/zoom involontario durante il game
+  - Canvas si ridimensiona correttamente su rotation portrait↔landscape
+  - Tap su exit ripristina la 404 originale
+- Browser target: ultime 2 versioni di Chrome, Firefox, Safari (incluso Mobile Safari iOS). No IE.
 - Niente test automatici per MVP (game logic difficile da unit-testare in vanilla canvas senza overhead; effort/value non lo giustifica per un easter egg).
 
 ## Rollout
@@ -159,8 +194,8 @@ Detect touch-only: `window.matchMedia('(hover: none) and (pointer: coarse)').mat
 
 ## Future iterations (esplicitamente fuori scope ora)
 
-- Controlli touch
 - Audio (mute-by-default)
 - Achievements / lore unlock (es. ogni 1000 punti, una breve frase filosofica)
 - Skin alternativi (vector dark, ASCII)
 - Konami code in homepage come *secondo* entry point (in aggiunta, non in sostituzione)
+- Haptic feedback su mobile (`navigator.vibrate`) per fire/collisione
