@@ -1,0 +1,226 @@
+# SYNC: keep schema mirrored with src/content/config.ts
+backend:
+  name: github
+  repo: AlbyIanna/sito-viglions
+  branch: main
+
+# Sveltia CMS: login via GitHub OAuth (Netlify public proxy, no setup needed)
+media_folder: public/uploads
+public_folder: /uploads
+
+locale: en
+
+collections:
+  - name: site
+    label: Site Info
+    files:
+      - file: src/content/site/info.json
+        label: Site Info
+        name: info
+        fields:
+          - { label: "Name", name: name, widget: string }
+          - { label: "Role", name: role, widget: string, hint: "e.g. Research Affiliate, Philosophy of Science" }
+          - { label: "Affiliation", name: affiliation, widget: string }
+          - { label: "Location", name: location, widget: string, required: false }
+          - { label: "Tagline", name: tagline, widget: text, hint: "One-sentence intro shown on the homepage" }
+          - { label: "Research tags", name: research_tags, widget: list, max: 6 }
+          - { label: "Email", name: email, widget: string, pattern: ['.+@.+\\..+', 'Must be a valid email'] }
+          - { label: "ORCID URL", name: orcid_url, widget: string, required: false }
+          - { label: "Google Scholar URL", name: scholar_url, widget: string, required: false }
+          - { label: "PhilPeople URL", name: philpeople_url, widget: string, required: false }
+          - { label: "Academia.edu URL", name: academia_url, widget: string, required: false }
+          - { label: "GitHub URL", name: github_url, widget: string, required: false }
+          - { label: "Photo", name: photo, widget: image, required: false, hint: "Profile photo, ~280x280px recommended" }
+          - { label: "Photo credit", name: photo_credit, widget: string, required: false }
+          - { label: "CV (PDF)", name: cv_pdf, widget: file, required: false, hint: "Upload CV PDF" }
+          - label: "Academic positions"
+            name: affiliations
+            widget: list
+            required: false
+            fields:
+              - { label: "Period", name: period, widget: string, hint: "e.g. 2023–2025" }
+              - { label: "Role", name: role, widget: string }
+              - { label: "Institution", name: institution, widget: string }
+              - { label: "Location", name: location, widget: string, required: false }
+              - { label: "Current", name: current, widget: boolean, default: false, required: false }
+          - label: "Education"
+            name: education
+            widget: list
+            required: false
+            fields:
+              - { label: "Period", name: period, widget: string }
+              - { label: "Degree", name: degree, widget: string }
+              - { label: "Institution", name: institution, widget: string }
+              - { label: "Location", name: location, widget: string, required: false }
+              - { label: "Thesis title", name: thesis_title, widget: string, required: false }
+              - { label: "Supervisors", name: supervisors, widget: string, required: false }
+              - { label: "Grade", name: grade, widget: string, required: false }
+          - label: "Editorial roles"
+            name: editorial_roles
+            widget: list
+            required: false
+            fields:
+              - { label: "Journal", name: journal, widget: string }
+              - { label: "Role", name: role, widget: string }
+              - { label: "URL", name: url, widget: string, required: false }
+          - label: "Memberships"
+            name: memberships
+            widget: list
+            required: false
+            fields:
+              - { label: "Name", name: name, widget: string }
+              - { label: "Role", name: role, widget: string, required: false }
+              - { label: "Period", name: period, widget: string, required: false }
+              - { label: "URL", name: url, widget: string, required: false }
+          - label: "Project memberships"
+            name: project_memberships
+            widget: list
+            required: false
+            fields:
+              - { label: "Name", name: name, widget: string }
+              - { label: "Period", name: period, widget: string }
+              - { label: "Role", name: role, widget: string, required: false }
+              - { label: "URL", name: url, widget: string, required: false }
+          - { label: "Peer review for", name: peer_review_for, widget: list, required: false, hint: "List of journals" }
+
+  - name: bio
+    label: Bio
+    label_singular: Bio
+    files:
+      - file: src/content/bio/main.md
+        label: About
+        name: main
+        fields:
+          - { label: "Title", name: title, widget: hidden, default: "About" }
+          - { label: "Body", name: body, widget: markdown }
+
+  - name: research
+    label: Research
+    label_singular: Research area
+    folder: src/content/research
+    create: true
+    slug: "{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Summary", name: summary, widget: text, hint: "1-2 sentences for the listing" }
+      - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
+      - { label: "Body", name: body, widget: markdown, required: false }
+
+  - name: news
+    label: News
+    label_singular: News item
+    folder: src/content/news
+    create: true
+    slug: "{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Date", name: date, widget: date }
+      - label: "Kind"
+        name: kind
+        widget: select
+        options:
+          - { label: "Upcoming event", value: upcoming }
+          - { label: "Recent event", value: recent }
+          - { label: "Award", value: award }
+          - { label: "Research visit", value: visit }
+      - { label: "Summary", name: summary, widget: text }
+      - { label: "URL", name: url, widget: string, required: false }
+      - { label: "Pinned", name: pinned, widget: boolean, default: false, hint: "Always show at the top, even if old" }
+      - { label: "Body (unused)", name: body, widget: hidden, default: "" }
+
+  - name: publications
+    label: Publications
+    label_singular: Publication
+    folder: src/content/publications
+    create: true
+    slug: "{{year}}-{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Authors", name: authors, widget: string, hint: "Comma-separated, e.g. Federico Viglione, Silvia De Bianchi" }
+      - { label: "Year", name: year, widget: number, value_type: int }
+      - { label: "Venue", name: venue, widget: string, hint: "Journal, publisher, or proceedings" }
+      - label: "Type"
+        name: type
+        widget: select
+        options:
+          - { label: "Journal article", value: journal-article }
+          - { label: "Book", value: book }
+          - { label: "Book chapter", value: book-chapter }
+          - { label: "Edited volume", value: edited-volume }
+          - { label: "Book review", value: book-review }
+          - { label: "Preprint", value: preprint }
+          - { label: "Conference paper", value: conference-paper }
+      - label: "Status"
+        name: status
+        widget: select
+        options:
+          - { label: "Published", value: published }
+          - { label: "Forthcoming", value: forthcoming }
+          - { label: "Under contract", value: under-contract }
+          - { label: "Under review", value: under-review }
+          - { label: "In preparation", value: in-preparation }
+      - { label: "DOI", name: doi, widget: string, required: false }
+      - { label: "URL", name: url, widget: string, required: false, hint: "Link to PDF or publisher page" }
+      - { label: "Abstract", name: abstract, widget: text, required: false }
+      - { label: "BibTeX", name: bibtex, widget: text, required: false }
+      - { label: "Co-authors note", name: coauthors_note, widget: string, required: false, hint: "e.g. Special section co-edited with X" }
+      - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
+      - { label: "Body (unused)", name: body, widget: hidden, default: "" }
+
+  - name: talks
+    label: Talks
+    label_singular: Talk
+    folder: src/content/talks
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - { label: "Venue", name: venue, widget: string }
+      - { label: "Location", name: location, widget: string, required: false }
+      - { label: "Date", name: date, widget: date }
+      - label: "Type"
+        name: type
+        widget: select
+        options:
+          - { label: "Invited", value: invited }
+          - { label: "Contributed", value: contributed }
+          - { label: "Keynote", value: keynote }
+          - { label: "Seminar", value: seminar }
+          - { label: "Workshop", value: workshop }
+      - { label: "Event URL", name: url, widget: string, required: false }
+      - { label: "Slides URL", name: slides_url, widget: string, required: false }
+      - { label: "Video URL", name: video_url, widget: string, required: false, hint: "YouTube, Vimeo, institutional streaming" }
+      - { label: "Abstract", name: abstract, widget: text, required: false }
+      - { label: "Body (unused)", name: body, widget: hidden, default: "" }
+
+  - name: organized_events
+    label: Organized Events
+    label_singular: Organized event
+    folder: src/content/organized_events
+    create: true
+    slug: "{{year}}-{{month}}-{{slug}}"
+    identifier_field: title
+    fields:
+      - { label: "Title", name: title, widget: string }
+      - label: "Role"
+        name: role
+        widget: select
+        options:
+          - { label: "Organizer", value: organizer }
+          - { label: "Co-organizer", value: co-organizer }
+          - { label: "Program committee", value: program-committee }
+          - { label: "Coordinator", value: coordinator }
+          - { label: "Committee member", value: committee-member }
+      - { label: "Venue", name: venue, widget: string }
+      - { label: "Location", name: location, widget: string, required: false }
+      - { label: "Start date", name: start_date, widget: date }
+      - { label: "End date", name: end_date, widget: date, required: false }
+      - { label: "URL", name: url, widget: string, required: false }
+      - { label: "Co-organizers", name: co_organizers, widget: string, required: false }
+      - { label: "Description", name: description, widget: text, required: false }
+      - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
+      - { label: "Body (unused)", name: body, widget: hidden, default: "" }
