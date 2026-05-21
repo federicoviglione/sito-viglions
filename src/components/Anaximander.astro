@@ -138,9 +138,9 @@
 
       const ROCK_SCORE: Record<RockSize, number> = { L: 20, M: 50, S: 100 };
 
-      const elScore = document.querySelector<HTMLElement>('[data-score]');
-      const elBest = document.querySelector<HTMLElement>('[data-best]');
-      const elWave = document.querySelector<HTMLElement>('[data-wave]');
+      const elScore = root.querySelector<HTMLElement>('[data-score]');
+      const elBest = root.querySelector<HTMLElement>('[data-best]');
+      const elWave = root.querySelector<HTMLElement>('[data-wave]');
 
       function syncHud() {
         if (elScore) elScore.textContent = String(score);
