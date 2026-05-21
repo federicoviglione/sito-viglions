@@ -480,7 +480,9 @@
         drawBullets();
         drawRocks();
         if (ship.alive !== false) drawShip(ship);
-        rafId = requestAnimationFrame(frame);
+        if (!gameOver) {
+          rafId = requestAnimationFrame(frame);
+        }
       }
 
       function start() {
@@ -571,6 +573,7 @@
 
       elRestart?.addEventListener('click', restart);
       elExit?.addEventListener('click', exitGame);
+      elPause?.addEventListener('click', togglePause);
     }
   }
 </script>
