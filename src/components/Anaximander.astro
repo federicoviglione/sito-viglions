@@ -14,6 +14,15 @@
       <span class="hud-label">wave</span>
       <span class="hud-wave" data-wave>1</span>
     </div>
+    <div class="anaximander-overlay" data-overlay hidden>
+      <p class="overlay-title" data-overlay-title>Drift over.</p>
+      <p class="overlay-sub" data-overlay-sub>—</p>
+      <div class="overlay-actions">
+        <button type="button" data-action="restart">Restart</button>
+        <button type="button" data-action="exit">Exit</button>
+      </div>
+    </div>
+    <div class="anaximander-pause" data-pause hidden>Paused — press P or tap</div>
   </div>
 </div>
 
@@ -64,6 +73,62 @@
     font-variant-numeric: tabular-nums;
   }
   .hud-divider { opacity: 0.4; }
+
+  .anaximander-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-4);
+    background: rgba(21, 23, 26, 0.78);
+    color: var(--paper);
+    text-align: center;
+    padding: var(--space-5);
+  }
+  .anaximander-overlay[hidden] { display: none; }
+  .overlay-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-2xl);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+  .overlay-sub {
+    font-size: var(--fs-sm);
+    opacity: 0.75;
+  }
+  .overlay-actions { display: flex; gap: var(--space-3); }
+  .overlay-actions button {
+    font: inherit;
+    font-size: var(--fs-sm);
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid var(--paper);
+    padding: var(--space-2) var(--space-4);
+    cursor: pointer;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  .overlay-actions button:hover {
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .overlay-actions button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .anaximander-pause {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--paper);
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    background: rgba(21, 23, 26, 0.55);
+  }
+  .anaximander-pause[hidden] { display: none; }
 </style>
 
 <script>
@@ -85,6 +150,13 @@
       let canvasW = 0;
       let canvasH = 0;
       let deathTimer = 0;
+      let paused = false;
+      let gameOver = false;
+      const elOverlay = root.querySelector<HTMLElement>('[data-overlay]');
+      const elOverlaySub = root.querySelector<HTMLElement>('[data-overlay-sub]');
+      const elPause = root.querySelector<HTMLElement>('[data-pause]');
+      const elRestart = root.querySelector<HTMLButtonElement>('[data-action="restart"]');
+      const elExit = root.querySelector<HTMLButtonElement>('[data-action="exit"]');
 
       // -------- Utilities --------
       function wrap(v: number, max: number): number {
@@ -214,6 +286,16 @@
         if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) {
           e.preventDefault();
         }
+        if (k === 'Escape') {
+          e.preventDefault();
+          exitGame();
+          return;
+        }
+        if (k === 'p' || k === 'P') {
+          e.preventDefault();
+          togglePause();
+          return;
+        }
         keys.add(k);
       }
       function onKeyUp(e: KeyboardEvent) {
@@ -264,19 +346,14 @@
       const MAX_SPEED = 350;     // px/sec
 
       function update(dt: number) {
-        if (ship.alive === false) {
+        if (ship.alive === false && !gameOver) {
           deathTimer += dt;
-          if (deathTimer > 1.5) {
-            deathTimer = 0;
-            bullets.length = 0;
-            ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
-            spawnWave(3, 1);
-            wave = 1;
-            score = 0;
-            syncHud();
+          if (deathTimer > 1.2) {
+            triggerGameOver();
           }
           return;
         }
+        if (gameOver) return;
 
         if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
         if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
@@ -395,6 +472,7 @@
 
       function frame(t: number) {
         if (!running) return;
+        if (paused) return;
         const dt = Math.min((t - lastT) / 1000, 0.05);
         lastT = t;
         update(dt);
@@ -427,6 +505,56 @@
         cancelAnimationFrame(rafId);
       }
 
+      function triggerGameOver() {
+        gameOver = true;
+        if (elOverlay) {
+          elOverlay.hidden = false;
+          if (elOverlaySub) {
+            elOverlaySub.textContent = `Distance traveled: ${score} observations. Best: ${best}.`;
+          }
+          elRestart?.focus();
+        }
+      }
+
+      function restart() {
+        gameOver = false;
+        if (elOverlay) elOverlay.hidden = true;
+        ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
+        bullets.length = 0;
+        wave = 1;
+        score = 0;
+        deathTimer = 0;
+        spawnWave(3, 1);
+        syncHud();
+        // Re-prime the loop in case rAF was not pending
+        if (running) {
+          lastT = performance.now();
+          rafId = requestAnimationFrame(frame);
+        }
+      }
+
+      function exitGame() {
+        stop();
+        gameOver = false;
+        paused = false;
+        if (elOverlay) elOverlay.hidden = true;
+        if (elPause) elPause.hidden = true;
+        root.setAttribute('data-state', 'idle');
+        root.setAttribute('aria-hidden', 'true');
+        const wanderBtn = document.getElementById('wander-btn');
+        wanderBtn?.focus();
+      }
+
+      function togglePause() {
+        if (!running || gameOver) return;
+        paused = !paused;
+        if (elPause) elPause.hidden = !paused;
+        if (!paused) {
+          lastT = performance.now();
+          rafId = requestAnimationFrame(frame);
+        }
+      }
+
       // -------- Events --------
       document.addEventListener('anaximander:start', () => {
         root.setAttribute('data-state', 'active');
@@ -440,6 +568,9 @@
 
       window.addEventListener('keydown', onKeyDown);
       window.addEventListener('keyup', onKeyUp);
+
+      elRestart?.addEventListener('click', restart);
+      elExit?.addEventListener('click', exitGame);
     }
   }
 </script>
