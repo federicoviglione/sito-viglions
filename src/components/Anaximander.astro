@@ -44,6 +44,34 @@
       let canvasW = 0;
       let canvasH = 0;
 
+      // -------- Utilities --------
+      function wrap(v: number, max: number): number {
+        if (v < 0) return v + max;
+        if (v >= max) return v - max;
+        return v;
+      }
+
+      // Dev-only micro-asserts (run once at module load in dev mode).
+      if (import.meta.env.DEV) {
+        console.assert(wrap(5, 10) === 5, 'wrap inside');
+        console.assert(wrap(-1, 10) === 9, 'wrap negative');
+        console.assert(wrap(11, 10) === 1, 'wrap over');
+      }
+
+      const keys = new Set<string>();
+
+      function onKeyDown(e: KeyboardEvent) {
+        if (!running) return;
+        const k = e.key;
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', ' '].includes(k)) {
+          e.preventDefault();
+        }
+        keys.add(k);
+      }
+      function onKeyUp(e: KeyboardEvent) {
+        keys.delete(e.key);
+      }
+
       // -------- Canvas sizing --------
       function resize() {
         const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -82,10 +110,36 @@
       }
 
       // -------- Loop --------
+      const ROT_SPEED = 3.5;     // rad/sec
+      const THRUST = 200;        // px/sec^2
+      const DRAG = 0.995;        // per frame at 60fps approx
+      const MAX_SPEED = 350;     // px/sec
+
+      function update(dt: number) {
+        if (keys.has('ArrowLeft')) ship.angle -= ROT_SPEED * dt;
+        if (keys.has('ArrowRight')) ship.angle += ROT_SPEED * dt;
+        if (keys.has('ArrowUp')) {
+          ship.vx += Math.cos(ship.angle) * THRUST * dt;
+          ship.vy += Math.sin(ship.angle) * THRUST * dt;
+          const sp = Math.hypot(ship.vx, ship.vy);
+          if (sp > MAX_SPEED) {
+            ship.vx = (ship.vx / sp) * MAX_SPEED;
+            ship.vy = (ship.vy / sp) * MAX_SPEED;
+          }
+        }
+        // Drag (frame-rate compensated)
+        const dragF = Math.pow(DRAG, dt * 60);
+        ship.vx *= dragF;
+        ship.vy *= dragF;
+        ship.x = wrap(ship.x + ship.vx * dt, canvasW);
+        ship.y = wrap(ship.y + ship.vy * dt, canvasH);
+      }
+
       function frame(t: number) {
         if (!running) return;
         const dt = Math.min((t - lastT) / 1000, 0.05);
         lastT = t;
+        update(dt);
         clear();
         drawShip(ship);
         rafId = requestAnimationFrame(frame);
@@ -114,6 +168,9 @@
       window.addEventListener('resize', () => {
         if (running) resize();
       });
+
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
     }
   }
 </script>
