@@ -35,7 +35,7 @@ sito-viglions/
 ├── public/
 │   ├── admin/                 # Sveltia CMS shell + config.yml
 │   ├── files/cv.pdf           # uploaded via CMS; placeholder until Federico replaces it
-│   ├── fonts/                 # fetched by scripts/fetch-fonts.mjs (woff2)
+│   ├── fonts/                 # gitignored; downloaded by scripts/fetch-fonts.mjs at postinstall
 │   ├── uploads/               # CMS-uploaded media (photos)
 │   ├── favicon.svg
 │   └── og-default.jpg
@@ -114,9 +114,9 @@ Send him that file when onboarding. Don't ask him to learn Markdown beyond what 
 - **Build command:** `npm run build` (from `netlify.toml`).
 - **Publish directory:** `dist/`.
 - **Branch:** `main` → production. Push to `main` = auto-deploy.
-- **Build trigger:** GitHub webhook. Sveltia commits to GitHub on Publish, Netlify picks it up.
+- **Build trigger:** GitHub webhook (Netlify GitHub App installed on the repo). Sveltia commits to GitHub on Publish, Netlify picks it up.
 - **Build time:** typically 30–60 s.
-- **Identity:** Federico's CMS login uses **Netlify Identity** (gated to his email). Invite him from the Netlify dashboard → Identity tab.
+- **Editor access:** Federico's CMS login uses **GitHub OAuth** brokered by a dedicated Cloudflare Worker (see "Auth proxy" below). To grant a new editor: add them as a **collaborator with `push` permission** on `AlbyIanna/sito-viglions`. They sign in at `/admin/` with their GitHub account and authorize the OAuth app on first login.
 
 Cache headers (set in `netlify.toml`):
 
@@ -131,6 +131,32 @@ Cache headers (set in `netlify.toml`):
 ## Domain
 
 See [`docs/domain-setup.md`](docs/domain-setup.md) for the one-time domain purchase, DNS, and (optional) email setup. Target domain: `federicoviglione.com`.
+
+---
+
+## Auth proxy (Cloudflare Worker)
+
+Sveltia CMS is git-based: it commits directly to GitHub via the GitHub API. To do that without each user pasting a personal access token, we use a tiny OAuth proxy — Sveltia's official one, hosted on a free Cloudflare Worker on Alberto's account.
+
+**Current deployment**
+
+- **Worker:** `sveltia-cms-auth` on Cloudflare account `alby.ianna@gmail.com`
+- **URL:** `https://sveltia-cms-auth.alby-ianna.workers.dev` (referenced as `base_url` in `public/admin/config.yml`)
+- **GitHub OAuth App:** "Sito Viglione CMS" under `AlbyIanna`'s GitHub account
+- **Worker secrets** (set via `wrangler secret put`): `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+
+**Flow at login time:** `/admin/` → user clicks "Sign in with GitHub" → Sveltia opens worker `/auth?provider=github` → worker redirects to `github.com/login/oauth/authorize` → GitHub redirects back to worker `/callback` → worker exchanges code for token → token returned to CMS via `postMessage`.
+
+**Rebuilding the worker from scratch** (e.g. if Alberto loses access, or to migrate to another Cloudflare account):
+
+1. `git clone https://github.com/sveltia/sveltia-cms-auth.git && cd sveltia-cms-auth`
+2. `npx wrangler login` (browser OAuth to Cloudflare)
+3. `npx wrangler deploy` — note the resulting `https://sveltia-cms-auth.<subdomain>.workers.dev` URL
+4. Register a new GitHub OAuth App at https://github.com/settings/applications/new with callback URL `<WORKER_URL>/callback`
+5. `npx wrangler secret put GITHUB_CLIENT_ID` (paste interactively) and same for `GITHUB_CLIENT_SECRET`
+6. Update `base_url` in `public/admin/config.yml` to the new worker URL, commit, push.
+
+The worker source code is read-only for us — it's vendored from upstream and deployed verbatim. Don't fork unless we need custom behavior (e.g. domain allowlist via `ALLOWED_DOMAINS` env var).
 
 ---
 
@@ -199,4 +225,6 @@ Both self-hosted from `public/fonts/`. Re-fetch with `npm run fetch-fonts`.
 - Build fails on Netlify but works locally → check Node version (Netlify uses `NODE_VERSION` from `netlify.toml`; local uses `.nvmrc`).
 - Federico says "I clicked Publish and nothing happened" → check the Netlify build log first (Deploys tab in the Netlify dashboard). If the build failed, the commit landed on GitHub but the deploy didn't.
 - CMS UI shows no entries → check `public/admin/config.yml` paths still match `src/content/<collection>/`.
-- Fonts not loading in production → confirm `public/fonts/*.woff2` is committed (they're git-tracked, not gitignored).
+- Fonts not loading in production → `public/fonts/` is **gitignored**; fonts are downloaded at install time by `scripts/fetch-fonts.mjs` (postinstall hook). Netlify runs `npm install` on every build, so they're regenerated. If a font source URL upstream changed, the script will fail — check the build log and update the URL in the script.
+- CMS shows "There are errors in the CMS configuration" → schema drift between `public/admin/config.yml` and Sveltia's expected widgets (e.g. the deprecated `date` widget — use `widget: datetime, type: date` instead). The CMS error panel lists each issue.
+- CMS login shows "Authentication aborted" / `auth.sveltia.app` cannot be found → the OAuth proxy is misconfigured. Verify `base_url` in `config.yml` matches the live Cloudflare Worker URL and that `GITHUB_CLIENT_ID`/`GITHUB_CLIENT_SECRET` worker secrets are set (`npx wrangler secret list` from a clone of the worker repo).
