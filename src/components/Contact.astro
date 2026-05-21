@@ -1,0 +1,50 @@
+---
+interface SocialLinks {
+  email: string;
+  orcid_url?: string;
+  scholar_url?: string;
+  philpeople_url?: string;
+  academia_url?: string;
+  github_url?: string;
+}
+interface Props {
+  social: SocialLinks;
+  cv_pdf?: string;
+}
+const { social, cv_pdf } = Astro.props;
+const links = [
+  social.orcid_url && { label: 'ORCID', href: social.orcid_url },
+  social.scholar_url && { label: 'Google Scholar', href: social.scholar_url },
+  social.philpeople_url && { label: 'PhilPeople', href: social.philpeople_url },
+  social.academia_url && { label: 'Academia.edu', href: social.academia_url },
+  social.github_url && { label: 'GitHub', href: social.github_url },
+].filter(Boolean) as Array<{ label: string; href: string }>;
+---
+<section id="contact" class="contact container">
+  <header class="section-head">
+    <div class="label">Contact</div>
+    <h2 class="section-title">Get in touch</h2>
+  </header>
+  <ul class="contact-list">
+    <li><span class="role">Email</span> <a href={`mailto:${social.email}`}>{social.email}</a></li>
+    {links.map(l => (
+      <li><span class="role">{l.label}</span> <a href={l.href} target="_blank" rel="noopener noreferrer">{l.href}</a></li>
+    ))}
+    {cv_pdf && <li><span class="role">CV</span> <a href={cv_pdf} target="_blank" rel="noopener noreferrer">Download PDF</a></li>}
+  </ul>
+</section>
+
+<style>
+  .contact { padding-block: var(--space-7) var(--space-9); }
+  .section-head { margin-bottom: var(--space-5); }
+  .section-head .label { margin-bottom: var(--space-2); }
+  .contact-list { list-style: none; display: grid; gap: var(--space-3); font-size: var(--fs-base); max-width: var(--max-prose); }
+  .contact-list li { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-4); align-items: baseline; }
+  .role { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted); }
+  .contact-list a { color: var(--ink); border-bottom: 1px dotted var(--rule); }
+  .contact-list a:hover { color: var(--accent); border-color: var(--accent); }
+
+  @media (max-width: 600px) {
+    .contact-list li { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>
