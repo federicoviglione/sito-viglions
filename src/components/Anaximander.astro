@@ -16,7 +16,7 @@
       <p class="overlay-title">Drift over.</p>
       <div class="overlay-stats">
         <div class="stat">
-          <span class="stat-label">Top speed</span>
+          <span class="stat-label">Max speed</span>
           <span class="stat-value" data-overlay-topspeed>0.000c</span>
           <span class="stat-detail" data-overlay-topspeed-kmh>0 km/h</span>
         </div>
@@ -349,6 +349,16 @@
       const BULLET_LIFE = 0.8;  // sec
       const FIRE_COOLDOWN = 0.15; // sec
 
+      // Debris: line segments that drift away from the ship on death.
+      type Debris = {
+        x: number; y: number;
+        vx: number; vy: number;
+        angle: number; va: number;
+        p1x: number; p1y: number;
+        p2x: number; p2y: number;
+      };
+      const debris: Debris[] = [];
+
       type RockSize = 'L' | 'M' | 'S';
       type Rock = {
         x: number; y: number;
@@ -543,6 +553,10 @@
             r.x *= sx; r.y *= sy;
             r.vx *= sx; r.vy *= sy;
           }
+          for (const d of debris) {
+            d.x *= sx; d.y *= sy;
+            d.vx *= sx; d.vy *= sy;
+          }
         } else if (!running) {
           ship.x = w / 2;
           ship.y = h / 2;
@@ -553,20 +567,73 @@
       }
 
       // -------- Drawing --------
+      // Ship outline vertices in local frame. Reused by drawShip and spawnDebris.
+      const SHIP_VERTS: Array<[number, number]> = [[12, 0], [-8, 7], [-5, 0], [-8, -7]];
+
       function drawShip(s: Ship) {
         ctx.save();
         ctx.translate(s.x, s.y);
         ctx.rotate(s.angle);
-        ctx.strokeStyle = '#f6f6f4'; // --paper
+        // Dim the silhouette once the ship is dead, leaving it as a marker.
+        ctx.strokeStyle = s.alive === false ? 'rgba(246, 246, 244, 0.5)' : '#f6f6f4';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(12, 0);
-        ctx.lineTo(-8, 7);
-        ctx.lineTo(-5, 0);
-        ctx.lineTo(-8, -7);
+        for (let i = 0; i < SHIP_VERTS.length; i++) {
+          const [x, y] = SHIP_VERTS[i];
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
         ctx.closePath();
         ctx.stroke();
         ctx.restore();
+      }
+
+      function spawnDebris(s: Ship) {
+        // One debris piece per side of the ship outline. Debris stay close to
+        // the death spot — they don't inherit the ship's velocity, only a
+        // small outward push, so the wreck reads as a single event.
+        const PUSH = 25; // px/sec outward from the ship centre
+        const cosA = Math.cos(s.angle);
+        const sinA = Math.sin(s.angle);
+        for (let i = 0; i < SHIP_VERTS.length; i++) {
+          const [ax, ay] = SHIP_VERTS[i];
+          const [bx, by] = SHIP_VERTS[(i + 1) % SHIP_VERTS.length];
+          // Midpoint of the side in local frame.
+          const mx = (ax + bx) / 2;
+          const my = (ay + by) / 2;
+          // World position of the midpoint.
+          const wx = s.x + cosA * mx - sinA * my;
+          const wy = s.y + sinA * mx + cosA * my;
+          // Outward direction (away from ship origin) in world frame.
+          const outx = cosA * mx - sinA * my;
+          const outy = sinA * mx + cosA * my;
+          const outLen = Math.hypot(outx, outy) || 1;
+          debris.push({
+            x: wx, y: wy,
+            vx: (outx / outLen) * PUSH,
+            vy: (outy / outLen) * PUSH,
+            angle: s.angle,
+            va: (Math.random() - 0.5) * 4,
+            p1x: ax - mx, p1y: ay - my,
+            p2x: bx - mx, p2y: by - my,
+          });
+        }
+      }
+
+      function drawDebris() {
+        if (debris.length === 0) return;
+        ctx.strokeStyle = 'rgba(246, 246, 244, 0.85)';
+        ctx.lineWidth = 1.5;
+        for (const d of debris) {
+          ctx.save();
+          ctx.translate(d.x, d.y);
+          ctx.rotate(d.angle);
+          ctx.beginPath();
+          ctx.moveTo(d.p1x, d.p1y);
+          ctx.lineTo(d.p2x, d.p2y);
+          ctx.stroke();
+          ctx.restore();
+        }
       }
 
       function clear() {
@@ -580,6 +647,13 @@
       const RECOIL = 15;         // px/sec impulse per shot, opposite of fire direction
 
       function update(dt: number) {
+        // Debris drift regardless of game state (until restart clears them).
+        for (const d of debris) {
+          d.x += d.vx * dt;
+          d.y += d.vy * dt;
+          d.angle += d.va * dt;
+        }
+
         if (ship.alive === false && !gameOver) {
           deathTimer += dt;
           if (deathTimer > 1.2) {
@@ -664,6 +738,7 @@
           for (const r of rocks) {
             if (circleHit(ship.x, ship.y, 6, r.x, r.y, r.radius)) {
               ship.alive = false;
+              spawnDebris(ship);
               break;
             }
           }
@@ -719,7 +794,8 @@
         clear();
         drawBullets();
         drawRocks();
-        if (ship.alive !== false) drawShip(ship);
+        drawDebris();
+        drawShip(ship);
         if (!gameOver) {
           rafId = requestAnimationFrame(frame);
         }
@@ -729,6 +805,7 @@
         if (running) return;
         ship = { x: 0, y: 0, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
+        debris.length = 0;
         wave = 1;
         maxV = 0;
         distancePx = 0;
@@ -791,6 +868,7 @@
         if (elOverlay) elOverlay.hidden = true;
         ship = { x: canvasW / 2, y: canvasH / 2, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true };
         bullets.length = 0;
+        debris.length = 0;
         wave = 1;
         maxV = 0;
         distancePx = 0;
