@@ -9,3 +9,4 @@ node_modules/
 .superpowers/
 .claude/worktrees/
 public/fonts/
+.playwright-mcp/
