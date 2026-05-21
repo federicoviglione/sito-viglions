@@ -1,10 +1,10 @@
 {
   "name": "Federico Viglione",
-  "role": "Research Affiliate, Philosophy of Science",
+  "role": "Research Affiliate · Philosophy of Science",
   "affiliation": "Università degli Studi di Torino",
   "location": "Turin, Italy",
-  "tagline": "Working on the metaphysics of time, the philosophy of cosmology, and the foundations of mathematics.",
-  "research_tags": ["time", "cosmology", "metaphysics", "mathematics"],
+  "tagline": "Working on the metaphysics of time, the philosophy of cosmology, and the philosophical foundations of mathematics.",
+  "research_tags": ["philosophy of time", "metaphysics of science", "cosmology", "mathematics"],
   "email": "federico.viglione@unimi.it",
   "orcid_url": "",
   "scholar_url": "",
@@ -16,13 +16,13 @@
   "cv_pdf": "/files/cv.pdf",
   "affiliations": [
     { "period": "2026–present", "role": "Research Affiliate (Cultore della Materia)", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "current": true },
-    { "period": "2023–2025", "role": "Postdoctoral Fellow", "institution": "Università degli Studi di Milano", "location": "Milan, Italy" },
-    { "period": "2018–2022", "role": "Predoctoral Researcher", "institution": "Universitat Autònoma de Barcelona", "location": "Barcelona, Spain" }
+    { "period": "2023–2025", "role": "Postdoctoral Fellow (Assegnista di Ricerca di Tipo B)", "institution": "Università degli Studi di Milano", "location": "Milan, Italy" },
+    { "period": "2018–2022", "role": "Predoctoral Researcher (Investigador Predoctoral)", "institution": "Universitat Autònoma de Barcelona", "location": "Barcelona, Spain" }
   ],
   "education": [
     { "period": "2018–2022", "degree": "PhD in Philosophy", "institution": "Universitat Autònoma de Barcelona", "location": "Barcelona, Spain", "thesis_title": "Time and Chances before the Changing Universe. A Metaphysical Inquiry", "supervisors": "Silvia De Bianchi; Giuliano Torrengo", "grade": "Cum laude" },
     { "period": "2015–2018", "degree": "Laurea magistrale in Philosophy", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "thesis_title": "Did time and world begin? Contemporary philosophical perspectives", "supervisors": "Vincenzo Crupi; Giuliano Torrengo", "grade": "110/110 e lode" },
-    { "period": "2011–2015", "degree": "Laurea triennale in Philosophy", "institution": "Università degli Studi di Torino", "location": "Turin, Italy" }
+    { "period": "2011–2015", "degree": "Laurea triennale in Philosophy", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "thesis_title": "Indeterminism and probability in Karl Popper's Postscript. An indeterministic interpretation of quantum reality", "supervisors": "Vincenzo Crupi", "grade": "106/110" }
   ],
   "editorial_roles": [],
   "memberships": [
