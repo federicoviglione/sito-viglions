@@ -1,0 +1,57 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getEntry } from 'astro:content';
+
+const site = await getEntry('site', 'info');
+const siteName = site?.data.name ?? 'Federico Viglione';
+---
+
+<Layout title={`Not found — ${siteName}`} description="The page you were looking for does not exist.">
+  <main class="not-found container">
+    <p class="label">Error</p>
+    <h1 class="code">404</h1>
+    <p class="message">The page you were looking for does not exist.</p>
+    <p class="back"><a href="/">Back to home</a></p>
+  </main>
+</Layout>
+
+<style>
+  .not-found {
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-block: var(--space-9);
+  }
+  .label {
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: var(--space-3);
+  }
+  .code {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(96px, 18vw, 200px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    margin-bottom: var(--space-5);
+  }
+  .message {
+    font-size: var(--fs-md);
+    max-width: 45ch;
+    margin-bottom: var(--space-5);
+    line-height: 1.5;
+  }
+  .back a {
+    font-size: var(--fs-sm);
+    color: var(--ink);
+    border-bottom: 1px dotted var(--rule);
+  }
+  .back a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+</style>
