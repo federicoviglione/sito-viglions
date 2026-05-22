@@ -86,6 +86,57 @@ collections:
               - { label: "Role", name: role, widget: string, required: false }
               - { label: "URL", name: url, widget: string, required: false }
           - { label: "Peer review for", name: peer_review_for, widget: list, required: false, hint: "List of journals" }
+          - label: "Theme settings"
+            name: theme
+            widget: object
+            required: false
+            fields:
+              - label: "Accent color"
+                name: accent
+                widget: select
+                default: blue
+                options:
+                  - { label: "Blue (default)", value: blue }
+                  - { label: "Bordeaux", value: bordeaux }
+                  - { label: "Forest", value: forest }
+                  - { label: "Amber", value: amber }
+                  - { label: "Ink (austere — no accent color)", value: ink }
+              - { label: "Show profile photo in hero", name: show_photo, widget: boolean, default: true }
+              - label: "Hero name size"
+                name: hero_name_size
+                widget: select
+                default: default
+                options:
+                  - { label: "Compact", value: compact }
+                  - { label: "Default", value: default }
+                  - { label: "Large", value: large }
+              - label: "Hidden sections (won't render even if non-empty)"
+                name: hidden_sections
+                widget: select
+                multiple: true
+                required: false
+                options:
+                  - { label: "Research", value: research }
+                  - { label: "News", value: news }
+                  - { label: "Publications", value: publications }
+                  - { label: "Talks", value: talks }
+                  - { label: "Organized events", value: organized_events }
+              - label: "Section order on homepage (drag to reorder)"
+                name: section_order
+                widget: list
+                default: [about, research, news, publications, talks, organized_events, contact]
+                field:
+                  label: Section
+                  name: id
+                  widget: select
+                  options:
+                    - { label: "About", value: about }
+                    - { label: "Research", value: research }
+                    - { label: "News", value: news }
+                    - { label: "Publications", value: publications }
+                    - { label: "Talks", value: talks }
+                    - { label: "Organized events", value: organized_events }
+                    - { label: "Contact", value: contact }
 
   - name: bio
     label: Bio

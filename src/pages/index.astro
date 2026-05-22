@@ -25,15 +25,57 @@ const publications = await getCollection('publications');
 const talks = await getCollection('talks');
 const organizedEvents = await getCollection('organized_events');
 
-const navItems = [
-  { id: 'about', label: 'about' },
-  research.length > 0 && { id: 'research', label: 'research' },
-  news.length > 0 && { id: 'news', label: 'news' },
-  publications.length > 0 && { id: 'publications', label: 'publications' },
-  talks.length > 0 && { id: 'talks', label: 'talks' },
-  organizedEvents.length > 0 && { id: 'organized-events', label: 'organized events' },
-  { id: 'contact', label: 'contact' },
-].filter(Boolean) as Array<{ id: string; label: string }>;
+// Zod gives us defaults, but keep a defensive fallback in case of unusual schema state.
+const theme = site.data.theme ?? {
+  accent: 'blue' as const,
+  show_photo: true,
+  hero_name_size: 'default' as const,
+  hidden_sections: [] as Array<'research' | 'news' | 'publications' | 'talks' | 'organized_events'>,
+  section_order: ['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact'] as Array<
+    'about' | 'research' | 'news' | 'publications' | 'talks' | 'organized_events' | 'contact'
+  >,
+};
+
+type SectionId = 'about' | 'research' | 'news' | 'publications' | 'talks' | 'organized_events' | 'contact';
+
+const hidden = new Set<string>(theme.hidden_sections);
+
+const hasContent: Record<SectionId, boolean> = {
+  about: true,
+  research: research.length > 0,
+  news: news.length > 0,
+  publications: publications.length > 0,
+  talks: talks.length > 0,
+  organized_events: organizedEvents.length > 0,
+  contact: true,
+};
+
+const navLabels: Record<SectionId, string> = {
+  about: 'about',
+  research: 'research',
+  news: 'news',
+  publications: 'publications',
+  talks: 'talks',
+  organized_events: 'organized events',
+  contact: 'contact',
+};
+
+// DOM anchor ids (organized_events -> "organized-events" per existing convention).
+const anchorIds: Record<SectionId, string> = {
+  about: 'about',
+  research: 'research',
+  news: 'news',
+  publications: 'publications',
+  talks: 'talks',
+  organized_events: 'organized-events',
+  contact: 'contact',
+};
+
+const visibleSections: SectionId[] = (theme.section_order as SectionId[]).filter(
+  (id) => !hidden.has(id) && hasContent[id]
+);
+
+const navItems = visibleSections.map((id) => ({ id: anchorIds[id], label: navLabels[id] }));
 
 const social = {
   email: site.data.email,
@@ -43,9 +85,16 @@ const social = {
   academia_url: site.data.academia_url,
   github_url: site.data.github_url,
 };
+
+const htmlClass = [
+  theme.accent !== 'blue' && `theme-${theme.accent}`,
+  theme.hero_name_size !== 'default' && `hero-name-${theme.hero_name_size}`,
+]
+  .filter(Boolean)
+  .join(' ');
 ---
 
-<Layout title={`${site.data.name} — ${site.data.role}`}>
+<Layout title={`${site.data.name} — ${site.data.role}`} htmlClass={htmlClass}>
   <Nav items={navItems} siteName={site.data.name} />
 
   <main>
@@ -59,33 +108,37 @@ const social = {
     photo={site.data.photo}
     photo_credit={site.data.photo_credit}
     social={social}
+    show_photo={theme.show_photo}
   />
 
-  <section id="about" class="about-wrapper container">
-    <header class="section-head">
-      <div class="label">About</div>
-      <h2 class="section-title">Biography</h2>
-    </header>
-    <div class="prose">
-      <BioContent />
-    </div>
-    <About
-      affiliations={site.data.affiliations}
-      education={site.data.education}
-      editorial_roles={site.data.editorial_roles}
-      memberships={site.data.memberships}
-      project_memberships={site.data.project_memberships}
-      peer_review_for={site.data.peer_review_for}
-    />
-  </section>
-
-  <ResearchSection />
-  <NewsSection />
-  <PublicationsSection />
-  <TalksSection />
-  <OrganizedEventsSection />
-
-  <Contact social={social} cv_pdf={site.data.cv_pdf} />
+  {visibleSections.map((id) => {
+    if (id === 'about') return (
+      <section id="about" class="about-wrapper container">
+        <header class="section-head">
+          <div class="label">About</div>
+          <h2 class="section-title">Biography</h2>
+        </header>
+        <div class="prose">
+          <BioContent />
+        </div>
+        <About
+          affiliations={site.data.affiliations}
+          education={site.data.education}
+          editorial_roles={site.data.editorial_roles}
+          memberships={site.data.memberships}
+          project_memberships={site.data.project_memberships}
+          peer_review_for={site.data.peer_review_for}
+        />
+      </section>
+    );
+    if (id === 'research') return <ResearchSection />;
+    if (id === 'news') return <NewsSection />;
+    if (id === 'publications') return <PublicationsSection />;
+    if (id === 'talks') return <TalksSection />;
+    if (id === 'organized_events') return <OrganizedEventsSection />;
+    if (id === 'contact') return <Contact social={social} cv_pdf={site.data.cv_pdf} />;
+    return null;
+  })}
   </main>
 
   <Footer siteName={site.data.name} />

@@ -53,6 +53,27 @@ const siteCollection = defineCollection({
       url: z.string().url().or(z.literal('')).optional(),
     })).optional(),
     peer_review_for: z.array(z.string()).optional(),
+    theme: z.object({
+      accent: z.enum(['blue', 'bordeaux', 'forest', 'amber', 'ink']).default('blue'),
+      show_photo: z.boolean().default(true),
+      hero_name_size: z.enum(['compact', 'default', 'large']).default('default'),
+      hidden_sections: z
+        .array(z.enum(['research', 'news', 'publications', 'talks', 'organized_events']))
+        .default([]),
+      section_order: z
+        .array(z.enum(['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact']))
+        .refine(
+          (arr) => arr.includes('about') && arr.includes('contact'),
+          { message: "section_order must include both 'about' and 'contact'" }
+        )
+        .default(['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact']),
+    }).default({
+      accent: 'blue',
+      show_photo: true,
+      hero_name_size: 'default',
+      hidden_sections: [],
+      section_order: ['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact'],
+    }),
   }),
 });
 

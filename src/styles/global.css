@@ -24,6 +24,9 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
   --status-forth:   #b45309;
   --status-review:  #6b7178;
 
+  /* Theme-controlled tokens (defaults; overridden by :root.theme-* / :root.hero-name-*) */
+  --fs-hero-name:   clamp(42px, 8vw, 52px);
+
   /* Spacing scale (base 4px) */
   --space-1: 4px;
   --space-2: 8px;
@@ -56,6 +59,19 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
   --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* ============================================
+   THEME VARIANTS (CMS-controlled accent palettes)
+   --status-forth / --status-review stay fixed.
+   ============================================ */
+:root.theme-bordeaux { --accent: #7c2030; --accent-soft: #fbeef0; }
+:root.theme-forest   { --accent: #1b5e20; --accent-soft: #ecf4ec; }
+:root.theme-amber    { --accent: #92400e; --accent-soft: #fdf4e7; }
+:root.theme-ink      { --accent: #15171a; --accent-soft: #ebebe8; }
+
+/* Hero name size variants (default has no class) */
+:root.hero-name-compact { --fs-hero-name: clamp(36px, 6vw, 44px); }
+:root.hero-name-large   { --fs-hero-name: clamp(56px, 11vw, 72px); }
 
 /* ============================================
    FONT FACES (self-hosted, see scripts/fetch-fonts.mjs)
