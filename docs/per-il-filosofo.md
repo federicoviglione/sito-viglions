@@ -2,7 +2,7 @@
 
 Benvenuto, Federico. Questa è la tua guida per aggiornare il tuo sito in autonomia. Niente codice, niente terminale: tutto avviene nel browser attraverso un piccolo pannello di amministrazione.
 
-Il sito è su `https://sito-viglions.netlify.app` (per ora usiamo il dominio gratuito di Netlify; quando attiveremo un dominio personalizzato cambierà solo l'indirizzo, non il funzionamento). Il pannello di amministrazione è su `https://sito-viglions.netlify.app/admin/`.
+Il sito è su https://sito-viglions.netlify.app (per ora usiamo il dominio gratuito di Netlify; quando attiveremo un dominio personalizzato cambierà solo l'indirizzo, non il funzionamento). Il pannello di amministrazione è su https://sito-viglions.netlify.app/admin/.
 
 Se qualcosa qui sotto non è chiaro o smette di funzionare, scrivi ad Alberto (alby.ianna@gmail.com).
 
@@ -10,7 +10,7 @@ Se qualcosa qui sotto non è chiaro o smette di funzionare, scrivi ad Alberto (a
 
 ## 1. Accedere
 
-1. Vai su `https://sito-viglions.netlify.app/admin/`.
+1. Vai su https://sito-viglions.netlify.app/admin/.
 2. Clicca **Sign in with GitHub** e autorizza con l'account GitHub che Alberto ha invitato al repository.
 
 Una volta dentro vedrai l'interfaccia di **Sveltia CMS**: una barra laterale a sinistra con tutte le sezioni del sito (Site, Bio, News, Publications, Talks, Organized events) e un'area principale dove si modifica.
@@ -29,7 +29,7 @@ Quasi tutto sul sito è già compilato a partire dal tuo CV. Per cambiare qualco
 4. Clicca **Save** (in alto a destra) quando hai finito.
 5. Dopo qualche secondo, clicca **Publish**.
 
-Il sito si ricostruisce da solo. Ricarica `https://sito-viglions.netlify.app` dopo 1–2 minuti e vedrai le modifiche.
+Il sito si ricostruisce da solo. Ricarica https://sito-viglions.netlify.app e dopo massimo 1–2 minuti vedrai le modifiche.
 
 > **Cosa significano "Save" e "Publish":** Save memorizza una bozza che vedi solo tu nel CMS. Publish scrive la modifica sul sito pubblico. Trattandosi del tuo sito personale, puoi pubblicare direttamente — non c'è un flusso di approvazione.
 
