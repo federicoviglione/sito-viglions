@@ -1,52 +1,115 @@
 ---
 import { getCollection } from 'astro:content';
-import PublicationItem from './PublicationItem.astro';
 
 const all = await getCollection('publications');
 
-const sortByYearDesc = (a: typeof all[number], b: typeof all[number]) => {
+type Pub = (typeof all)[number];
+
+const sortByYearDesc = (a: Pub, b: Pub) => {
   if (a.data.year !== b.data.year) return b.data.year - a.data.year;
   return (a.data.order ?? 99) - (b.data.order ?? 99);
 };
 
+// Bibliography groups, in the order of the approved design (1b).
 const groups = [
-  { label: 'Published', status: ['published'] },
-  { label: 'Forthcoming', status: ['forthcoming', 'under-contract'] },
-  { label: 'Under review', status: ['under-review'] },
-  { label: 'In preparation', status: ['in-preparation'] },
+  { label: 'Books', types: ['book'] },
+  { label: 'Journal articles', types: ['journal-article'] },
+  { label: 'Book chapters', types: ['book-chapter'] },
+  { label: 'Edited volumes', types: ['edited-volume'] },
+  { label: 'Book reviews', types: ['book-review'] },
+  { label: 'Preprints & conference papers', types: ['preprint', 'conference-paper'] },
 ];
 
 const visible = groups
-  .map(g => ({ ...g, items: all.filter(p => g.status.includes(p.data.status)).sort(sortByYearDesc) }))
+  .map(g => ({ ...g, items: all.filter(p => g.types.includes(p.data.type)).sort(sortByYearDesc) }))
   .filter(g => g.items.length > 0);
+
+const statusLabels: Record<string, string> = {
+  forthcoming: 'Forthcoming',
+  'under-review': 'Under review',
+  'under-contract': 'Under contract',
+  'in-preparation': 'In preparation',
+};
+
+function lead(p: Pub) {
+  return p.data.status === 'published' ? String(p.data.year) : (statusLabels[p.data.status] ?? String(p.data.year));
+}
+
+function link(p: Pub) {
+  if (p.data.url) return p.data.url;
+  if (p.data.doi) return `https://doi.org/${p.data.doi}`;
+  return null;
+}
 ---
 {visible.length > 0 && (
-  <section id="publications" class="publications container">
-    <header class="section-head">
-      <div class="label">Publications</div>
-      <h2 class="section-title">Papers, chapters, and books</h2>
-    </header>
-    {visible.map(g => (
-      <div class="pub-group">
-        <h3 class="group-label">{g.label}</h3>
-        {g.items.map(p => <PublicationItem {...p.data} />)}
-      </div>
-    ))}
+  <section id="research" class="research page section">
+    <h2 class="section-title">Research</h2>
+    <div class="groups">
+      {visible.map(g => (
+        <div class="group">
+          <div class="group-label">{g.label}</div>
+          <div class="entries">
+            {g.items.map(p => {
+              const href = link(p);
+              return (
+                <div class="entry">
+                  <span class="lead">{lead(p)}</span> · {href
+                    ? <a class="title" href={href} target="_blank" rel="noopener noreferrer">{p.data.title}</a>
+                    : <span class="title">{p.data.title}</span>} · <em class="venue">{p.data.venue}</em>{p.data.coauthors_note && <span class="note"> · {p.data.coauthors_note}</span>}
+                  {p.data.abstract && (
+                    <details class="abstract">
+                      <summary>Abstract</summary>
+                      <p>{p.data.abstract}</p>
+                    </details>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
   </section>
 )}
 
 <style>
-  .publications { padding-block: var(--space-7); }
-  .section-head { margin-bottom: var(--space-4); }
-  .section-head .label { margin-bottom: var(--space-2); }
-  .pub-group { margin-bottom: var(--space-6); }
-  .pub-group:last-child { margin-bottom: 0; }
-  .group-label {
+  .groups { display: flex; flex-direction: column; gap: var(--space-5); }
+  .group .group-label { margin-bottom: var(--space-3); }
+  .entries { display: flex; flex-direction: column; gap: 14px; }
+  .entry {
+    font-family: var(--font-serif);
+    font-size: var(--fs-bib);
+    line-height: 1.65;
+    color: var(--ink);
+    padding-left: 28px;
+    text-indent: -28px;
+  }
+  .lead { color: var(--ink); }
+  .title { color: var(--accent); }
+  a.title { border-bottom: 1px solid transparent; }
+  a.title:hover { color: var(--accent); border-bottom-color: var(--accent-soft); }
+  .venue { color: var(--ink); }
+  .note { color: var(--muted); }
+
+  .abstract {
+    text-indent: 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    margin-top: var(--space-1);
+  }
+  .abstract summary {
+    cursor: pointer;
+    color: var(--muted);
     font-size: var(--fs-xs);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    margin-bottom: var(--space-2);
+    letter-spacing: 0.1em;
   }
-  .pub-group > :global(article.pub:last-child) { border-bottom: 1px solid var(--rule); }
+  .abstract summary:hover { color: var(--accent); }
+  .abstract p {
+    margin-top: var(--space-2);
+    line-height: 1.6;
+    color: var(--ink);
+    font-family: var(--font-serif);
+    font-size: 15px;
+  }
 </style>

@@ -1,0 +1,78 @@
+---
+interface NavItem { id: string; label: string; }
+interface Props {
+  name: string;
+  subtitle: string;
+  items: NavItem[];
+}
+const { name, subtitle, items } = Astro.props;
+
+// Accent the initial of the last word ("Federico Viglione" -> accent on "V").
+const words = name.trim().split(/\s+/);
+const lastWord = words.pop() ?? '';
+const leading = words.join(' ');
+const initial = lastWord.slice(0, 1);
+const rest = lastWord.slice(1);
+---
+
+<header id="top" class="masthead page">
+  <h1 class="name">
+    {leading && `${leading} `}<span class="initial">{initial}</span>{rest}
+  </h1>
+  <p class="subtitle">{subtitle}</p>
+  <nav class="rule-nav" aria-label="Main">
+    <ul>
+      {items.map(item => (
+        <li><a href={`#${item.id}`}>{item.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+</header>
+
+<style>
+  .masthead {
+    padding-top: var(--space-8);
+    text-align: center;
+  }
+  .name {
+    font-family: var(--font-display);
+    font-size: var(--fs-masthead);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: var(--space-3);
+  }
+  .initial { color: var(--accent); }
+  .subtitle {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    margin-bottom: var(--space-5);
+  }
+  .rule-nav {
+    border-top: 2px solid var(--ink);
+    border-bottom: 1px solid var(--rule);
+  }
+  .rule-nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 26px;
+    row-gap: var(--space-1);
+    padding-block: 11px;
+  }
+  .rule-nav a {
+    font-size: 11.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+  .rule-nav a:hover { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    .masthead { padding-top: var(--space-7); }
+    .rule-nav ul { column-gap: var(--space-4); }
+  }
+</style>

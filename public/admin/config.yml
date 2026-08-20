@@ -26,15 +26,14 @@ collections:
           - { label: "Role", name: role, widget: string, hint: "e.g. Research Affiliate, Philosophy of Science" }
           - { label: "Affiliation", name: affiliation, widget: string }
           - { label: "Location", name: location, widget: string, required: false }
-          - { label: "Tagline", name: tagline, widget: text, hint: "One-sentence intro shown on the homepage" }
-          - { label: "Research tags", name: research_tags, widget: list, max: 6 }
+          - { label: "Tagline", name: tagline, widget: text, hint: "One-sentence description used for search engines and link previews" }
           - { label: "Email", name: email, widget: string, pattern: ['.+@.+\\..+', 'Must be a valid email'] }
           - { label: "ORCID URL", name: orcid_url, widget: string, required: false }
           - { label: "Google Scholar URL", name: scholar_url, widget: string, required: false }
           - { label: "PhilPeople URL", name: philpeople_url, widget: string, required: false }
           - { label: "Academia.edu URL", name: academia_url, widget: string, required: false }
           - { label: "GitHub URL", name: github_url, widget: string, required: false }
-          - { label: "Photo", name: photo, widget: image, required: false, hint: "Profile photo, ~280x280px recommended" }
+          - { label: "Photo", name: photo, widget: image, required: false, hint: "Portrait photo, 4:5 ratio (~600x750px) recommended" }
           - { label: "Photo credit", name: photo_credit, widget: string, required: false }
           - { label: "CV (PDF)", name: cv_pdf, widget: file, required: false, hint: "Upload CV PDF" }
           - label: "Academic positions"
@@ -91,18 +90,19 @@ collections:
             widget: object
             required: false
             fields:
-              - label: "Accent color"
-                name: accent
+              - label: "Palette"
+                name: palette
                 widget: select
-                default: blue
+                default: bianca
+                hint: "Paper, text, and accent colors change together"
                 options:
-                  - { label: "Blue (default)", value: blue }
-                  - { label: "Bordeaux", value: bordeaux }
-                  - { label: "Forest", value: forest }
-                  - { label: "Amber", value: amber }
-                  - { label: "Ink (austere — no accent color)", value: ink }
-              - { label: "Show profile photo in hero", name: show_photo, widget: boolean, default: true }
-              - label: "Hero name size"
+                  - { label: "Bianca granata (default) — white paper, garnet accent", value: bianca }
+                  - { label: "Bordeaux — cream paper, bordeaux accent", value: bordeaux }
+                  - { label: "Blu editoriale — light paper, blue accent", value: blu }
+                  - { label: "Foresta — light paper, green accent", value: foresta }
+                  - { label: "Ambra — warm paper, amber accent", value: ambra }
+              - { label: "Show portrait photo in About", name: show_photo, widget: boolean, default: true }
+              - label: "Name size in the header"
                 name: hero_name_size
                 widget: select
                 default: default
@@ -115,28 +115,28 @@ collections:
                 widget: select
                 multiple: true
                 required: false
+                default: [news, organized_events]
                 options:
-                  - { label: "Research", value: research }
-                  - { label: "News", value: news }
-                  - { label: "Publications", value: publications }
+                  - { label: "Research (publications)", value: publications }
+                  - { label: "Projects", value: projects }
                   - { label: "Talks", value: talks }
+                  - { label: "News", value: news }
                   - { label: "Organized events", value: organized_events }
               - label: "Section order on homepage (drag to reorder)"
                 name: section_order
                 widget: list
-                default: [about, research, news, publications, talks, organized_events, contact]
+                default: [about, publications, projects, talks, news, organized_events]
                 field:
                   label: Section
                   name: id
                   widget: select
                   options:
                     - { label: "About", value: about }
-                    - { label: "Research", value: research }
-                    - { label: "News", value: news }
-                    - { label: "Publications", value: publications }
+                    - { label: "Research (publications)", value: publications }
+                    - { label: "Projects", value: projects }
                     - { label: "Talks", value: talks }
+                    - { label: "News", value: news }
                     - { label: "Organized events", value: organized_events }
-                    - { label: "Contact", value: contact }
 
   - name: bio
     label: Bio
@@ -148,19 +148,6 @@ collections:
         fields:
           - { label: "Title", name: title, widget: hidden, default: "About" }
           - { label: "Body", name: body, widget: markdown }
-
-  - name: research
-    label: Research
-    label_singular: Research area
-    folder: src/content/research
-    create: true
-    slug: "{{slug}}"
-    identifier_field: title
-    fields:
-      - { label: "Title", name: title, widget: string }
-      - { label: "Summary", name: summary, widget: text, hint: "1-2 sentences for the listing" }
-      - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
-      - { label: "Body", name: body, widget: markdown, required: false }
 
   - name: news
     label: News

@@ -1,0 +1,36 @@
+---
+interface ProjectMembership { name: string; period: string; role?: string; url?: string; }
+interface Props {
+  projects: ProjectMembership[];
+}
+const { projects } = Astro.props;
+---
+{projects.length > 0 && (
+  <section id="projects" class="projects page section">
+    <h2 class="section-title">Projects</h2>
+    <div class="list">
+      {projects.map(p => (
+        <div class="project">
+          <span class="name">
+            {p.url ? <a href={p.url} target="_blank" rel="noopener noreferrer">{p.name}</a> : p.name}
+          </span>
+          <span class="meta">{[p.role ?? 'Member', p.period].filter(Boolean).join(' · ')}</span>
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .list { display: flex; flex-direction: column; gap: var(--space-3); }
+  .project { display: flex; flex-direction: column; gap: 1px; }
+  .name {
+    font-family: var(--font-serif);
+    font-size: var(--fs-bib);
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .name a { color: var(--accent); }
+  .name a:hover { color: var(--ink); }
+  .meta { font-size: var(--fs-sm); color: var(--muted); }
+</style>

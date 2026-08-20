@@ -44,14 +44,13 @@ sito-viglions/
 ├── src/
 │   ├── content/
 │   │   ├── config.ts          # Astro content collection schemas (SOURCE OF TRUTH for types)
-│   │   ├── site/              # 1 JSON entry — name, role, links, affiliations, education...
+│   │   ├── site/              # 1 JSON entry — name, role, links, affiliations, education, theme...
 │   │   ├── bio/               # markdown
-│   │   ├── research/          # one md file per research area
 │   │   ├── news/              # one md file per news item (pinned/dated)
 │   │   ├── publications/      # one md file per publication
 │   │   ├── talks/             # one md file per talk
 │   │   └── organized_events/  # one md file per event organized
-│   ├── components/            # Hero, About, ResearchSection, NewsSection, etc.
+│   ├── components/            # Masthead, About, PublicationsSection, ProjectsSection, etc.
 │   ├── layouts/               # Base layout (head, meta, fonts)
 │   ├── pages/                 # index.astro (single-page composition) + 404.astro
 │   └── styles/global.css      # design tokens + base styles
@@ -90,11 +89,12 @@ The `// SYNC:` comment at the top of `src/content/config.ts` is a reminder for f
 |---|---|---|---|
 | `site` | data (JSON) | 1 entry | n/a |
 | `bio` | content (markdown) | 1 entry | n/a |
-| `research` | content (markdown) | many | `order` ascending |
 | `news` | content (markdown) | many | `date` desc, `pinned` first |
-| `publications` | content (markdown) | many | `year` desc, then `order` |
+| `publications` | content (markdown) | many | grouped by `type`, then `year` desc, then `order` |
 | `talks` | content (markdown) | many | `date` desc |
-| `organized_events` | content (markdown) | many | `start_date` desc, then `order` |
+| `organized_events` | content (markdown) | many | `start_date` desc |
+
+The homepage renders `publications` under the **"Research"** heading as a bibliography grouped by type (Books, Journal articles, Book chapters, Edited volumes, Book reviews, Preprints & conference papers). The **Projects** section renders `site.project_memberships`. **News and Organized events are hidden by default** via `theme.hidden_sections` — Federico can re-enable them from the CMS Theme settings.
 
 News items have a **6-month rolling window**: non-pinned items older than 6 months drop off the homepage automatically. Pinned items stay forever. See `src/components/NewsSection.astro`.
 
@@ -164,48 +164,37 @@ The worker source code is read-only for us — it's vendored from upstream and d
 
 All tokens live in `src/styles/global.css` as CSS custom properties. Tweak there — they propagate site-wide.
 
-**Palette**
+**Palettes** ("Classico accademico" design — paper, ink, rules, and accent change together)
 
-| Token | Value | Use |
-|---|---|---|
-| `--paper` | `#f6f6f4` | Page background |
-| `--surface` | `#ffffff` | Cards, raised surfaces |
-| `--ink` | `#15171a` | Body text, headings |
-| `--muted` | `#6b7178` | Secondary text, labels |
-| `--rule` | `#d4d6da` | Borders, dividers |
-| `--accent` | `#1d4ed8` | Links, focus states |
-| `--accent-soft` | `#eff3ff` | Tinted backgrounds (tag chips, hover) |
-| `--status-forth` | `#b45309` | "Forthcoming" publication chip |
-| `--status-review` | `#6b7178` | "Under review" / "In preparation" chip |
+Each CMS-selectable palette redefines the full token set via a `:root.palette-*` class. Default (bare `:root`) is **bianca** — white paper `#ffffff`, garnet accent `#8e2340`. Variants: `palette-bordeaux` (cream/`#7c2030`), `palette-blu` (`#1d4ed8`), `palette-foresta` (`#1b5e20`), `palette-ambra` (`#92400e`). Per-palette tokens: `--paper`, `--ink`, `--muted`, `--sub`, `--rule`, `--accent`, `--accent-soft`, `--stripe-a/b`.
 
 **Type scale**
 
 | Token | Value | Typical use |
 |---|---|---|
-| `--fs-xs` | 11px | Micro labels, captions |
-| `--fs-sm` | 13px | Metadata, dates |
-| `--fs-base` | 15px | Body |
-| `--fs-md` | 17px | Lead paragraphs |
-| `--fs-lg` | 20px | Section eyebrows |
-| `--fs-xl` | 28px | H3 |
-| `--fs-2xl` | 36px | H2 |
-| `--fs-3xl` | 52px | Hero name (H1) |
+| `--fs-xs` | 11px | Micro labels (group labels, footer) |
+| `--fs-sm` | 13px | Metadata, dates, facts |
+| `--fs-base` | 15px | UI text |
+| `--fs-serif` | 16.5px | Bio prose (Source Serif 4) |
+| `--fs-bib` | 16px | Bibliography entries, talk titles |
+| `--fs-section` | 24px | Section headings (Fraunces) |
+| `--fs-masthead` | clamp 32–40px | Site name in the masthead (theme-controlled) |
 
-**Spacing** (4px base): `--space-1` (4px) → `--space-10` (128px). Stick to the scale; don't introduce one-off values.
+**Spacing** (4px base): `--space-1` (4px) → `--space-9` (96px). Stick to the scale; don't introduce one-off values.
 
 **Containers**
 
-- `--max-narrow` 680px — prose, single-column lists
-- `--max-content` 920px — main content width
-- `--max-prose` 65ch — long-form bio/abstracts
-- `--gutter` `clamp(20px, 4vw, 40px)` — page-edge padding
+- `--max-page` 780px — the single narrow "book page" column everything lives in
+- `--gutter` `clamp(20px, 5vw, 32px)` — page-edge padding
 
 **Fonts**
 
-- `--font-display` — Fraunces (variable, serif) for headings + name
-- `--font-body` — Inter (variable, sans) for body, UI, metadata
+- `--font-display` — Fraunces (variable, serif) for the name + section headings
+- `--font-serif` — Source Serif 4 (variable, normal + italic) for bio prose and bibliography
+- `--font-body` — Inter (variable, sans) for UI, metadata, buttons
+- `--font-mono` — system monospace for dates
 
-Both self-hosted from `public/fonts/`. Re-fetch with `npm run fetch-fonts`.
+All self-hosted from `public/fonts/`. Re-fetch with `npm run fetch-fonts`.
 
 ---
 
@@ -213,7 +202,7 @@ Both self-hosted from `public/fonts/`. Re-fetch with `npm run fetch-fonts`.
 
 - **No CSS framework.** Plain CSS with custom properties — fewer dependencies, easier for future-Alberto to read.
 - **Single page.** Everything is composed in `src/pages/index.astro` from section components. No client-side router, no SPA.
-- **No JavaScript in the runtime** unless absolutely necessary (`is:inline` only for the small scrollspy / detail-toggle logic).
+- **No JavaScript in the runtime** unless absolutely necessary (the 404 easter egg is the only script).
 - **Italian for ops docs (`domain-setup.md`)**, English for editorial docs (`per-il-filosofo.md`) and code.
 - **Commit messages:** conventional-ish — `feat:`, `fix:`, `chore:`, `docs:`, `content:`. Lowercase.
 

@@ -1,10 +1,9 @@
 {
   "name": "Federico Viglione",
-  "role": "Research Affiliate · Philosophy of Science",
+  "role": "Philosophy of Science",
   "affiliation": "Università degli Studi di Torino",
   "location": "Turin, Italy",
   "tagline": "Working on the metaphysics of time, the philosophy of cosmology, and the philosophical foundations of mathematics.",
-  "research_tags": ["philosophy of time", "metaphysics of science", "cosmology", "mathematics"],
   "email": "federico.viglione@unimi.it",
   "orcid_url": "",
   "scholar_url": "",
@@ -36,5 +35,12 @@
     { "name": "CHRONOS: Rethinking and Communicating Time", "period": "2020–2024" },
     { "name": "PROTEUS: Paradoxes and Metaphors of Time in Early Universe(s) (ERC Starting Grant)", "period": "2018–2023" }
   ],
-  "peer_review_for": ["Mind", "Synthese", "Journal for General Philosophy of Science", "Studies in History and Philosophy of Science"]
+  "peer_review_for": ["Mind", "Synthese", "Journal for General Philosophy of Science", "Studies in History and Philosophy of Science"],
+  "theme": {
+    "palette": "bianca",
+    "show_photo": true,
+    "hero_name_size": "default",
+    "hidden_sections": ["news", "organized_events"],
+    "section_order": ["about", "publications", "projects", "talks", "news", "organized_events"]
+  }
 }
