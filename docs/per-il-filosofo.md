@@ -1,171 +1,171 @@
-# For the Philosopher — editor's guide
+# Per il filosofo — guida all'editing
 
-Welcome, Federico. This is your one-page guide to editing your own website. No coding, no terminal. Everything happens in the browser through a small admin panel.
+Benvenuto, Federico. Questa è la tua guida per aggiornare il tuo sito in autonomia. Niente codice, niente terminale: tutto avviene nel browser attraverso un piccolo pannello di amministrazione.
 
-The site is at `https://federicoviglione.com` (or whatever domain is set up at deploy time). The admin panel is at `https://federicoviglione.com/admin/`.
+Il sito è su `https://sito-viglions.netlify.app` (per ora usiamo il dominio gratuito di Netlify; quando attiveremo un dominio personalizzato cambierà solo l'indirizzo, non il funzionamento). Il pannello di amministrazione è su `https://sito-viglions.netlify.app/admin/`.
 
-If anything below is unclear or stops working, write to Alberto (alby.ianna@gmail.com).
-
----
-
-## 1. Logging in
-
-1. Go to `https://federicoviglione.com/admin/`.
-2. Click **Sign in with GitHub** and authorize with the GitHub account Alberto invited to the repository.
-
-Once logged in you'll see the **Sveltia CMS** interface: a left sidebar with all the sections of the site (Site, Bio, News, Publications, Talks, Organized events), and a main area where you edit.
-
-> If you get an authentication error, log out (top-right) and log in again. Sveltia sometimes caches a stale session.
+Se qualcosa qui sotto non è chiaro o smette di funzionare, scrivi ad Alberto (alby.ianna@gmail.com).
 
 ---
 
-## 2. Editing existing content
+## 1. Accedere
 
-Most things on the site are already filled in from your CV. To change something:
+1. Vai su `https://sito-viglions.netlify.app/admin/`.
+2. Clicca **Sign in with GitHub** e autorizza con l'account GitHub che Alberto ha invitato al repository.
 
-1. From the sidebar, click the section (e.g. **Publications**).
-2. You'll see a list of entries. Click the one you want to edit.
-3. Edit the fields. The right panel shows a live preview.
-4. Click **Save** (top-right) when done.
-5. After a few seconds, click **Publish**.
+Una volta dentro vedrai l'interfaccia di **Sveltia CMS**: una barra laterale a sinistra con tutte le sezioni del sito (Site, Bio, News, Publications, Talks, Organized events) e un'area principale dove si modifica.
 
-The site rebuilds automatically. Refresh `https://federicoviglione.com` after about 1–2 minutes and you'll see your changes.
-
-> **What "Save" vs "Publish" means:** Save stores a draft only you can see in the CMS. Publish writes the change to the live site. For your own site, you can publish directly — there's no editorial workflow set up.
+> Se compare un errore di autenticazione, esci (in alto a destra) e riaccedi. A volte Sveltia tiene in cache una sessione scaduta.
 
 ---
 
-## 3. Adding new content
+## 2. Modificare contenuti esistenti
 
-Same flow for every section. Example: a new talk.
+Quasi tutto sul sito è già compilato a partire dal tuo CV. Per cambiare qualcosa:
 
-1. **Talks** in the sidebar → **New Talks** (top-right).
-2. Fill in:
-   - **Title** — full title of the talk
-   - **Venue** — e.g. "Università di Bologna, Department of Philosophy"
-   - **Location** — e.g. "Bologna, Italy" (optional)
-   - **Date** — pick from the calendar
-   - **Type** — invited, contributed, keynote, seminar, or workshop
-   - **URL** / **Slides URL** / **Video URL** — optional
-   - **Abstract** — optional, a few sentences
+1. Dalla barra laterale, clicca la sezione (es. **Publications**).
+2. Vedrai l'elenco delle voci. Clicca quella da modificare.
+3. Modifica i campi. Il pannello a destra mostra un'anteprima dal vivo.
+4. Clicca **Save** (in alto a destra) quando hai finito.
+5. Dopo qualche secondo, clicca **Publish**.
+
+Il sito si ricostruisce da solo. Ricarica `https://sito-viglions.netlify.app` dopo 1–2 minuti e vedrai le modifiche.
+
+> **Cosa significano "Save" e "Publish":** Save memorizza una bozza che vedi solo tu nel CMS. Publish scrive la modifica sul sito pubblico. Trattandosi del tuo sito personale, puoi pubblicare direttamente — non c'è un flusso di approvazione.
+
+---
+
+## 3. Aggiungere nuovi contenuti
+
+Il flusso è lo stesso per ogni sezione. Esempio: un nuovo talk.
+
+1. **Talks** nella barra laterale → **New Talks** (in alto a destra).
+2. Compila:
+   - **Title** — titolo completo del talk
+   - **Venue** — es. "Università di Bologna, Department of Philosophy"
+   - **Location** — es. "Bologna, Italy" (facoltativo)
+   - **Date** — scegli dal calendario
+   - **Type** — invited, contributed, keynote, seminar o workshop
+   - **URL** / **Slides URL** / **Video URL** — facoltativi
+   - **Abstract** — facoltativo, qualche frase
 3. **Save** → **Publish**.
 
-The same flow applies to **Publications**, **News**, and **Organized events**. Required fields are marked with an asterisk; the panel won't let you save until they're filled.
+Lo stesso flusso vale per **Publications**, **News** e **Organized events**. I campi obbligatori sono contrassegnati da un asterisco; il pannello non lascia salvare finché non sono compilati.
 
-> **Publications appear on the site under the "Research" heading**, grouped automatically by type: Books, Journal articles, Book chapters, Edited volumes, and so on. Just set the **Type** field correctly and the entry lands in the right group.
+> **Le pubblicazioni compaiono sul sito sotto il titolo "Research"**, raggruppate automaticamente per tipo: Books, Journal articles, Book chapters, Edited volumes e così via. Basta impostare correttamente il campo **Type** e la voce finisce nel gruppo giusto.
 
-> **Tip — `order` fields:** Publications and Organized events have an optional **Order** number. Lower numbers appear first *within the same year*. Leave it at the default (99) unless you want to force a specific order.
+> **Suggerimento — campi `order`:** Publications e Organized events hanno un campo **Order** facoltativo. I numeri più bassi compaiono prima *a parità di anno*. Lascialo al valore predefinito (99) a meno che tu non voglia forzare un ordine preciso.
 
 ---
 
-## 4. Uploading your CV
+## 4. Caricare il CV
 
-The site has a **Download CV** button in the About section that links to `/files/cv.pdf`. To replace the placeholder with your real CV:
+Il sito ha un bottone **Download CV** nella sezione About che punta a `/files/cv.pdf`. Per sostituire il segnaposto con il tuo CV vero:
 
-1. From the sidebar, go to **Site** → click the existing entry.
-2. Scroll to the **CV PDF** field.
-3. Click the upload area (it currently shows `/files/cv.pdf`).
-4. Drag-and-drop your new PDF, or click to pick from your computer.
-5. The file uploads — Sveltia renames it and tracks it for you.
+1. Dalla barra laterale, vai su **Site** → clicca la voce esistente.
+2. Scorri fino al campo **CV PDF**.
+3. Clicca l'area di caricamento (al momento mostra `/files/cv.pdf`).
+4. Trascina il nuovo PDF, oppure clicca per sceglierlo dal computer.
+5. Il file viene caricato — Sveltia lo rinomina e lo gestisce per te.
 6. **Save** → **Publish**.
 
-The button on the homepage now links to your new CV.
+Il bottone in homepage ora punta al nuovo CV.
 
-> **Filename note:** the path `/files/cv.pdf` is referenced in a few places. Sveltia handles the rename transparently, so don't worry about the original filename — you can upload `viglione-cv-2026.pdf` and it will work.
+> **Nota sul nome del file:** il percorso `/files/cv.pdf` è referenziato in più punti, ma Sveltia gestisce la rinomina in modo trasparente. Puoi caricare `viglione-cv-2026.pdf` e funzionerà comunque.
 
 ---
 
-## 5. Uploading a photo
+## 5. Caricare una foto
 
-The About section has a portrait spot next to your bio. To upload:
+La sezione About ha uno spazio per il ritratto accanto alla bio. Per caricarlo:
 
-1. **Site** → existing entry.
-2. **Photo** field → upload.
-3. Recommended: portrait-orientation JPG, roughly 4:5 ratio (e.g. 600×750 px), max ~500 KB. Sveltia compresses it.
-4. Optional: **Photo credit** field for the photographer's name.
+1. **Site** → voce esistente.
+2. Campo **Photo** → carica.
+3. Consigliato: JPG verticale, proporzioni circa 4:5 (es. 600×750 px), massimo ~500 KB. Sveltia lo comprime.
+4. Facoltativo: campo **Photo credit** per il nome del fotografo.
 5. **Save** → **Publish**.
 
-If you leave the Photo field empty, the About section shows just the text — no broken image.
+Se lasci vuoto il campo Photo, la sezione About mostra solo il testo — nessuna immagine rotta.
 
 ---
 
-## 6. Changing how the site looks (Theme settings)
+## 6. Cambiare l'aspetto del sito (Theme settings)
 
-At the bottom of **Site** → entry there is a **Theme settings** panel. Everything here is safe to experiment with — nothing can break, and every change is reversible:
+In fondo a **Site** → voce esistente c'è il pannello **Theme settings**. Qui puoi sperimentare in tranquillità — non si rompe niente, e ogni modifica è reversibile:
 
-- **Palette** — the overall color scheme (paper, text, and accent change together). Default is *Bianca granata* (white paper, garnet accent); the alternatives are *Bordeaux*, *Blu editoriale*, *Foresta*, and *Ambra*.
-- **Show portrait photo in About** — toggle the photo off if you prefer text only.
+- **Palette** — lo schema colori complessivo (carta, testo e colore d'accento cambiano insieme). Il default è *Bianca granata* (carta bianca, accento granata); le alternative sono *Bordeaux*, *Blu editoriale*, *Foresta* e *Ambra*.
+- **Show portrait photo in About** — disattiva la foto se preferisci solo testo.
 - **Name size in the header** — compact / default / large.
-- **Hidden sections** — sections listed here exist in the CMS but don't appear on the site. **News and Organized events are hidden by default**; remove them from this list to make them appear on the homepage.
-- **Section order** — drag to reorder the homepage sections.
+- **Hidden sections** — le sezioni in questa lista esistono nel CMS ma non compaiono sul sito. **News e Organized events sono nascoste di default**; toglile dalla lista per farle apparire in homepage.
+- **Section order** — trascina per riordinare le sezioni della homepage.
 
-As always: **Save** → **Publish**, wait a couple of minutes, refresh.
+Come sempre: **Save** → **Publish**, aspetta un paio di minuti, ricarica.
 
 ---
 
-## 7. Pinning a news item
+## 7. Fissare una news in alto (pin)
 
-Some news items deserve to stay visible even after the date passes (e.g. a major award, an upcoming event you want to highlight). Mark them as **pinned**:
+Alcune news meritano di restare visibili anche dopo che la data è passata (es. un premio importante, un evento in arrivo che vuoi mettere in evidenza). Contrassegnale come **pinned**:
 
-1. **News** → open the entry.
-2. Toggle **Pinned** to ON.
+1. **News** → apri la voce.
+2. Attiva l'interruttore **Pinned**.
 3. **Save** → **Publish**.
 
-Pinned items stay in the News section permanently. Non-pinned items disappear automatically when their date is older than ~6 months — the section curates itself.
+Le voci pinned restano nella sezione News per sempre. Quelle non pinned spariscono da sole quando la data è più vecchia di ~6 mesi — la sezione si cura da sola.
 
-> **Note:** the News section is hidden on the homepage by default. To show it, remove "News" from **Hidden sections** in Theme settings (see section 6).
+> **Quando fare pin:** premi, borse, contratti per libri, posizioni in visita. **Quando non farlo:** talk di routine (compaiono comunque sotto Talks), seminari locali, post da blog.
 
-> **When to pin:** awards, fellowships, book contracts, visiting positions. **When not to pin:** routine talks (they show up under Talks anyway), local seminars, blog posts.
-
----
-
-## 8. What happens after you click Publish
-
-Behind the scenes:
-
-1. Sveltia writes your change to the GitHub repository (silent — you don't see this).
-2. Netlify detects the change and starts a build (~30–60 seconds).
-3. The new build replaces the live site.
-4. Total time from Publish to live: usually 1–2 minutes.
-
-You can keep working in the CMS while a build is in progress — your next change just queues up.
+> **Nota:** la sezione News è nascosta in homepage di default. Per mostrarla, togli "News" da **Hidden sections** nelle Theme settings (vedi sezione 6).
 
 ---
 
-## 9. Troubleshooting — site doesn't update after 2 minutes
+## 8. Cosa succede dopo aver cliccato Publish
 
-99% of the time it's a cache. Try this in order:
+Dietro le quinte:
 
-1. **Hard refresh:** Cmd-Shift-R (Mac) or Ctrl-F5 (Windows). Forces the browser to fetch the latest version.
-2. **Incognito window:** open the site in a private window. If it shows the new version, your browser cache was stale.
-3. **Wait 5 more minutes:** Netlify build queues can occasionally take longer at peak times.
-4. **Still nothing?** Write to Alberto with: (a) what you changed, (b) when you clicked Publish, (c) a screenshot of the CMS showing the change saved. He'll check the Netlify build log.
+1. Sveltia scrive la modifica nel repository GitHub (in silenzio — non lo vedi).
+2. Netlify rileva la modifica e avvia una build (~30–60 secondi).
+3. La nuova build sostituisce il sito pubblico.
+4. Tempo totale da Publish alla pubblicazione: di solito 1–2 minuti.
 
----
-
-## 10. Where the content lives
-
-Everything you edit through the CMS is stored as plain text files in a GitHub repository (`sito-viglions`). You don't need to interact with GitHub — Sveltia handles it — but knowing this means:
-
-- **You can't lose data accidentally.** Every change is a Git commit; Alberto can restore any prior version.
-- **You can export the whole site.** If one day you want to move to a different platform, all your content is in human-readable Markdown and JSON files.
-- **Drafts don't pollute the live site.** A Save without Publish stays as an unpublished draft in the CMS only.
+Puoi continuare a lavorare nel CMS mentre una build è in corso — la modifica successiva si mette in coda.
 
 ---
 
-## 11. Quick reference
+## 9. Problemi — il sito non si aggiorna dopo 2 minuti
 
-| Task | Section | Action |
+Nel 99% dei casi è una cache. Prova in questo ordine:
+
+1. **Ricarica forzata:** Cmd-Shift-R (Mac) o Ctrl-F5 (Windows). Costringe il browser a scaricare la versione più recente.
+2. **Finestra in incognito:** apri il sito in una finestra privata. Se lì vedi la versione nuova, era la cache del browser.
+3. **Aspetta altri 5 minuti:** le code di build di Netlify a volte si allungano nelle ore di punta.
+4. **Ancora niente?** Scrivi ad Alberto con: (a) cosa hai cambiato, (b) quando hai cliccato Publish, (c) uno screenshot del CMS con la modifica salvata. Controllerà il log di build su Netlify.
+
+---
+
+## 10. Dove vivono i contenuti
+
+Tutto ciò che modifichi dal CMS è salvato come file di testo in un repository GitHub (`sito-viglions`). Non devi interagire con GitHub — se ne occupa Sveltia — ma saperlo significa che:
+
+- **Non puoi perdere dati per sbaglio.** Ogni modifica è un commit Git; Alberto può ripristinare qualsiasi versione precedente.
+- **Puoi esportare tutto il sito.** Se un giorno vorrai passare a un'altra piattaforma, tutti i contenuti sono in file Markdown e JSON leggibili.
+- **Le bozze non sporcano il sito pubblico.** Un Save senza Publish resta una bozza non pubblicata, visibile solo nel CMS.
+
+---
+
+## 11. Riferimento rapido
+
+| Attività | Sezione | Azione |
 |------|---------|--------|
-| Update bio / affiliation | Site → entry | Edit fields → Save → Publish |
-| Change colors / sections shown | Site → Theme settings | Pick palette, edit hidden sections → Save → Publish |
-| Add a publication | Publications → New | Fill fields → Save → Publish |
-| Add a talk | Talks → New | Fill fields → Save → Publish |
-| Add news item | News → New | Choose kind (upcoming/recent/award/visit) → Save → Publish |
-| Replace CV | Site → CV PDF | Upload new PDF → Save → Publish |
-| Change photo | Site → Photo | Upload new image → Save → Publish |
-| Highlight news permanently | News → entry | Toggle Pinned → Save → Publish |
+| Aggiornare bio / affiliazione | Site → voce | Modifica i campi → Save → Publish |
+| Cambiare colori / sezioni visibili | Site → Theme settings | Scegli la palette, modifica le sezioni nascoste → Save → Publish |
+| Aggiungere una pubblicazione | Publications → New | Compila i campi → Save → Publish |
+| Aggiungere un talk | Talks → New | Compila i campi → Save → Publish |
+| Aggiungere una news | News → New | Scegli il tipo (upcoming/recent/award/visit) → Save → Publish |
+| Sostituire il CV | Site → CV PDF | Carica il nuovo PDF → Save → Publish |
+| Cambiare la foto | Site → Photo | Carica la nuova immagine → Save → Publish |
+| Evidenziare una news per sempre | News → voce | Attiva Pinned → Save → Publish |
 
 ---
 
-That's it. The CMS is intentionally minimal — if you find yourself wanting a feature that isn't there, write to Alberto rather than working around it; it's probably 10 minutes of work to add.
+È tutto. Il CMS è volutamente minimale: se ti accorgi di volere una funzione che non c'è, scrivi ad Alberto invece di arrangiarti con soluzioni di fortuna — probabilmente sono 10 minuti di lavoro per aggiungerla.
