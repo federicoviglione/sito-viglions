@@ -10,22 +10,24 @@ input, button, textarea, select { font: inherit; }
 p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
 
 /* ============================================
-   DESIGN TOKENS (Editorial-tech cool, variant D)
+   DESIGN TOKENS ("Classico accademico", layout 1b)
+   Default palette: bianca granata. Each palette-* class
+   redefines paper/ink/rules/accent together.
    ============================================ */
 :root {
-  /* Palette */
-  --paper:          #f6f6f4;
-  --surface:        #ffffff;
-  --ink:            #15171a;
-  --muted:          #6b7178;
-  --rule:           #d4d6da;
-  --accent:         #1d4ed8;
-  --accent-soft:    #eff3ff;
-  --status-forth:   #b45309;
-  --status-review:  #6b7178;
+  /* Palette — bianca granata (default) */
+  --paper:       #ffffff;
+  --ink:         #1a181a;
+  --muted:       #716c70;
+  --sub:         #a5a0a4;
+  --rule:        #e6e3e4;
+  --accent:      #8e2340;
+  --accent-soft: rgba(142, 35, 64, 0.35);
+  --stripe-a:    #f2f0f1;
+  --stripe-b:    #eae7e9;
 
-  /* Theme-controlled tokens (defaults; overridden by :root.theme-* / :root.hero-name-*) */
-  --fs-hero-name:   clamp(42px, 8vw, 52px);
+  /* Theme-controlled tokens (overridden by :root.hero-name-*) */
+  --fs-masthead: clamp(32px, 7vw, 40px);
 
   /* Spacing scale (base 4px) */
   --space-1: 4px;
@@ -37,41 +39,54 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
   --space-7: 48px;
   --space-8: 64px;
   --space-9: 96px;
-  --space-10: 128px;
 
   /* Type scale */
   --fs-xs: 11px;
   --fs-sm: 13px;
   --fs-base: 15px;
-  --fs-md: 17px;
-  --fs-lg: 20px;
-  --fs-xl: 28px;
-  --fs-2xl: 36px;
-  --fs-3xl: 52px;
+  --fs-serif: 16.5px;
+  --fs-bib: 16px;
+  --fs-section: 24px;
 
   /* Containers */
-  --max-narrow: 680px;
-  --max-content: 920px;
-  --max-prose: 65ch;
-  --gutter: clamp(20px, 4vw, 40px);
+  --max-page: 780px;
+  --gutter: clamp(20px, 5vw, 32px);
 
   /* Fonts */
   --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+  --font-serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
 }
 
 /* ============================================
-   THEME VARIANTS (CMS-controlled accent palettes)
-   --status-forth / --status-review stay fixed.
+   PALETTE VARIANTS (CMS-controlled; values from the
+   approved design canvas — accent, paper, ink change together)
    ============================================ */
-:root.theme-bordeaux { --accent: #7c2030; --accent-soft: #fbeef0; }
-:root.theme-forest   { --accent: #1b5e20; --accent-soft: #ecf4ec; }
-:root.theme-amber    { --accent: #92400e; --accent-soft: #fdf4e7; }
-:root.theme-ink      { --accent: #15171a; --accent-soft: #ebebe8; }
+:root.palette-bordeaux {
+  --paper: #f9f6f1; --ink: #201d19; --muted: #6f6a62; --sub: #a39d93;
+  --rule: #ddd7cc; --accent: #7c2030; --accent-soft: rgba(124, 32, 48, 0.35);
+  --stripe-a: #efe9df; --stripe-b: #e7e0d3;
+}
+:root.palette-blu {
+  --paper: #f6f6f4; --ink: #15171a; --muted: #6b7178; --sub: #9aa0a6;
+  --rule: #d4d6da; --accent: #1d4ed8; --accent-soft: rgba(29, 78, 216, 0.35);
+  --stripe-a: #eaebe8; --stripe-b: #e0e1de;
+}
+:root.palette-foresta {
+  --paper: #f5f7f1; --ink: #161a14; --muted: #68705f; --sub: #99a18e;
+  --rule: #d3d8cc; --accent: #1b5e20; --accent-soft: rgba(27, 94, 32, 0.35);
+  --stripe-a: #e9eee0; --stripe-b: #dfe5d4;
+}
+:root.palette-ambra {
+  --paper: #faf5ec; --ink: #211a11; --muted: #75695a; --sub: #a99c86;
+  --rule: #e0d7c4; --accent: #92400e; --accent-soft: rgba(146, 64, 14, 0.35);
+  --stripe-a: #f1e8d8; --stripe-b: #e9dfc9;
+}
 
-/* Hero name size variants (default has no class) */
-:root.hero-name-compact { --fs-hero-name: clamp(36px, 6vw, 44px); }
-:root.hero-name-large   { --fs-hero-name: clamp(56px, 11vw, 72px); }
+/* Masthead name size variants (default has no class) */
+:root.hero-name-compact { --fs-masthead: clamp(28px, 6vw, 34px); }
+:root.hero-name-large   { --fs-masthead: clamp(36px, 8vw, 48px); }
 
 /* ============================================
    FONT FACES (self-hosted, see scripts/fetch-fonts.mjs)
@@ -88,6 +103,20 @@ p, h1, h2, h3, h4, h5, h6 { overflow-wrap: break-word; }
   src: url('/fonts/InterVariable.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/SourceSerif4-VariableFont.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Serif 4';
+  src: url('/fonts/SourceSerif4-Italic-VariableFont.woff2') format('woff2-variations');
+  font-weight: 200 900;
+  font-style: italic;
   font-display: swap;
 }
 
@@ -111,17 +140,37 @@ a:hover { color: var(--ink); }
 
 ::selection { background: var(--accent); color: var(--paper); }
 
-/* Utility */
-.container { max-width: var(--max-content); margin: 0 auto; padding-inline: var(--gutter); }
+html { scroll-behavior: smooth; scroll-padding-top: var(--space-5); }
+
+/* ============================================
+   PAGE COLUMN & SECTION LANGUAGE (layout 1b)
+   ============================================ */
+.page {
+  max-width: var(--max-page);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+.section {
+  border-top: 1px solid var(--rule);
+  padding-block: var(--space-6);
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--fs-section);
+  font-weight: 500;
+  letter-spacing: 0;
+  margin-bottom: var(--space-4);
+}
+.group-label {
+  font-size: var(--fs-xs);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--sub);
+}
 .label {
   font-size: var(--fs-xs);
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--muted);
-}
-.section-title {
-  font-family: var(--font-display);
-  font-size: var(--fs-xl);
-  font-weight: 500;
-  letter-spacing: -0.01em;
 }

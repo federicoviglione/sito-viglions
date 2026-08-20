@@ -9,7 +9,6 @@ const siteCollection = defineCollection({
     affiliation: z.string(),
     location: z.string().optional(),
     tagline: z.string(),
-    research_tags: z.array(z.string()).max(6),
     email: z.string().email(),
     orcid_url: z.string().url().or(z.literal('')).optional(),
     scholar_url: z.string().url().or(z.literal('')).optional(),
@@ -54,25 +53,25 @@ const siteCollection = defineCollection({
     })).optional(),
     peer_review_for: z.array(z.string()).optional(),
     theme: z.object({
-      accent: z.enum(['blue', 'bordeaux', 'forest', 'amber', 'ink']).default('blue'),
+      palette: z.enum(['bianca', 'bordeaux', 'blu', 'foresta', 'ambra']).default('bianca'),
       show_photo: z.boolean().default(true),
       hero_name_size: z.enum(['compact', 'default', 'large']).default('default'),
       hidden_sections: z
-        .array(z.enum(['research', 'news', 'publications', 'talks', 'organized_events']))
-        .default([]),
+        .array(z.enum(['publications', 'projects', 'talks', 'news', 'organized_events']))
+        .default(['news', 'organized_events']),
       section_order: z
-        .array(z.enum(['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact']))
+        .array(z.enum(['about', 'publications', 'projects', 'talks', 'news', 'organized_events']))
         .refine(
-          (arr) => arr.includes('about') && arr.includes('contact'),
-          { message: "section_order must include both 'about' and 'contact'" }
+          (arr) => arr.includes('about'),
+          { message: "section_order must include 'about'" }
         )
-        .default(['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact']),
+        .default(['about', 'publications', 'projects', 'talks', 'news', 'organized_events']),
     }).default({
-      accent: 'blue',
+      palette: 'bianca',
       show_photo: true,
       hero_name_size: 'default',
-      hidden_sections: [],
-      section_order: ['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact'],
+      hidden_sections: ['news', 'organized_events'],
+      section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'],
     }),
   }),
 });
@@ -81,15 +80,6 @@ const bioCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-  }),
-});
-
-const researchCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    summary: z.string(),
-    order: z.number().default(99),
   }),
 });
 
@@ -171,7 +161,6 @@ const organizedEventsCollection = defineCollection({
 export const collections = {
   site: siteCollection,
   bio: bioCollection,
-  research: researchCollection,
   news: newsCollection,
   publications: publicationsCollection,
   talks: talksCollection,

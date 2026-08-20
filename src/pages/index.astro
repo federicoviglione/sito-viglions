@@ -1,15 +1,13 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import Nav from '../components/Nav.astro';
+import Masthead from '../components/Masthead.astro';
 import Footer from '../components/Footer.astro';
-import Hero from '../components/Hero.astro';
 import About from '../components/About.astro';
-import ResearchSection from '../components/ResearchSection.astro';
-import NewsSection from '../components/NewsSection.astro';
 import PublicationsSection from '../components/PublicationsSection.astro';
+import ProjectsSection from '../components/ProjectsSection.astro';
 import TalksSection from '../components/TalksSection.astro';
+import NewsSection from '../components/NewsSection.astro';
 import OrganizedEventsSection from '../components/OrganizedEventsSection.astro';
-import Contact from '../components/Contact.astro';
 import { getEntry, getCollection, render } from 'astro:content';
 
 const site = await getEntry('site', 'info');
@@ -19,56 +17,51 @@ const bio = await getEntry('bio', 'main');
 if (!bio) throw new Error('Missing bio/main content entry');
 const { Content: BioContent } = await render(bio);
 
-const research = await getCollection('research');
 const news = await getCollection('news');
 const publications = await getCollection('publications');
 const talks = await getCollection('talks');
 const organizedEvents = await getCollection('organized_events');
+const projects = site.data.project_memberships ?? [];
+
+type SectionId = 'about' | 'publications' | 'projects' | 'talks' | 'news' | 'organized_events';
 
 // Zod gives us defaults, but keep a defensive fallback in case of unusual schema state.
 const theme = site.data.theme ?? {
-  accent: 'blue' as const,
+  palette: 'bianca' as const,
   show_photo: true,
   hero_name_size: 'default' as const,
-  hidden_sections: [] as Array<'research' | 'news' | 'publications' | 'talks' | 'organized_events'>,
-  section_order: ['about', 'research', 'news', 'publications', 'talks', 'organized_events', 'contact'] as Array<
-    'about' | 'research' | 'news' | 'publications' | 'talks' | 'organized_events' | 'contact'
-  >,
+  hidden_sections: ['news', 'organized_events'] as SectionId[],
+  section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'] as SectionId[],
 };
-
-type SectionId = 'about' | 'research' | 'news' | 'publications' | 'talks' | 'organized_events' | 'contact';
 
 const hidden = new Set<string>(theme.hidden_sections);
 
 const hasContent: Record<SectionId, boolean> = {
   about: true,
-  research: research.length > 0,
-  news: news.length > 0,
   publications: publications.length > 0,
+  projects: projects.length > 0,
   talks: talks.length > 0,
+  news: news.length > 0,
   organized_events: organizedEvents.length > 0,
-  contact: true,
 };
 
 const navLabels: Record<SectionId, string> = {
-  about: 'about',
-  research: 'research',
-  news: 'news',
-  publications: 'publications',
-  talks: 'talks',
-  organized_events: 'organized events',
-  contact: 'contact',
+  about: 'About',
+  publications: 'Research',
+  projects: 'Projects',
+  talks: 'Talks',
+  news: 'News',
+  organized_events: 'Events',
 };
 
-// DOM anchor ids (organized_events -> "organized-events" per existing convention).
+// DOM anchor ids (publications renders as the "Research" bibliography).
 const anchorIds: Record<SectionId, string> = {
   about: 'about',
-  research: 'research',
-  news: 'news',
-  publications: 'publications',
+  publications: 'research',
+  projects: 'projects',
   talks: 'talks',
+  news: 'news',
   organized_events: 'organized-events',
-  contact: 'contact',
 };
 
 const visibleSections: SectionId[] = (theme.section_order as SectionId[]).filter(
@@ -87,97 +80,51 @@ const social = {
 };
 
 const htmlClass = [
-  theme.accent !== 'blue' && `theme-${theme.accent}`,
+  theme.palette !== 'bianca' && `palette-${theme.palette}`,
   theme.hero_name_size !== 'default' && `hero-name-${theme.hero_name_size}`,
 ]
   .filter(Boolean)
   .join(' ');
 ---
 
-<Layout title={`${site.data.name} — ${site.data.role}`} htmlClass={htmlClass}>
-  <Nav items={navItems} siteName={site.data.name} />
-
-  <main>
-  <Hero
+<Layout
+  title={`${site.data.name} — ${site.data.role}`}
+  description={site.data.tagline}
+  htmlClass={htmlClass}
+>
+  <Masthead
     name={site.data.name}
-    role={site.data.role}
-    affiliation={site.data.affiliation}
-    location={site.data.location}
-    tagline={site.data.tagline}
-    research_tags={site.data.research_tags}
-    photo={site.data.photo}
-    photo_credit={site.data.photo_credit}
-    social={social}
-    show_photo={theme.show_photo}
+    subtitle={`${site.data.role} · ${site.data.affiliation}`}
+    items={navItems}
   />
 
-  {visibleSections.map((id) => {
-    if (id === 'about') return (
-      <section id="about" class="about-wrapper container">
-        <header class="section-head">
-          <div class="label">About</div>
-          <h2 class="section-title">Biography</h2>
-        </header>
-        <div class="prose">
-          <BioContent />
-        </div>
+  <main>
+    {visibleSections.map((id) => {
+      if (id === 'about') return (
         <About
+          name={site.data.name}
+          photo={site.data.photo}
+          photo_credit={site.data.photo_credit}
+          show_photo={theme.show_photo}
+          social={social}
+          cv_pdf={site.data.cv_pdf}
           affiliations={site.data.affiliations}
           education={site.data.education}
           editorial_roles={site.data.editorial_roles}
           memberships={site.data.memberships}
-          project_memberships={site.data.project_memberships}
           peer_review_for={site.data.peer_review_for}
-        />
-      </section>
-    );
-    if (id === 'research') return <ResearchSection />;
-    if (id === 'news') return <NewsSection />;
-    if (id === 'publications') return <PublicationsSection />;
-    if (id === 'talks') return <TalksSection />;
-    if (id === 'organized_events') return <OrganizedEventsSection />;
-    if (id === 'contact') return <Contact social={social} cv_pdf={site.data.cv_pdf} />;
-    return null;
-  })}
+        >
+          <BioContent />
+        </About>
+      );
+      if (id === 'publications') return <PublicationsSection />;
+      if (id === 'projects') return <ProjectsSection projects={projects} />;
+      if (id === 'talks') return <TalksSection />;
+      if (id === 'news') return <NewsSection />;
+      if (id === 'organized_events') return <OrganizedEventsSection />;
+      return null;
+    })}
   </main>
 
   <Footer siteName={site.data.name} />
 </Layout>
-
-<style>
-  .about-wrapper {
-    padding-block: var(--space-7);
-  }
-  .section-head {
-    margin-bottom: var(--space-5);
-  }
-  .section-head .label {
-    margin-bottom: var(--space-2);
-  }
-  .section-title {
-    font-family: var(--font-display);
-    font-size: var(--fs-xl);
-    font-weight: 500;
-    letter-spacing: -0.01em;
-  }
-  .prose {
-    max-width: var(--max-prose);
-    font-size: var(--fs-base);
-    line-height: 1.65;
-    margin-bottom: var(--space-7);
-  }
-  .prose :global(p) {
-    margin-bottom: var(--space-4);
-  }
-  .prose :global(p:last-child) {
-    margin-bottom: 0;
-  }
-  .prose :global(a) {
-    color: var(--ink);
-    border-bottom: 1px dotted var(--rule);
-  }
-  .prose :global(a:hover) {
-    color: var(--accent);
-    border-color: var(--accent);
-  }
-</style>

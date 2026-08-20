@@ -18,6 +18,14 @@ const FONTS = [
     name: 'InterVariable.woff2',
     url: 'https://github.com/rsms/inter/raw/master/docs/font-files/InterVariable.woff2',
   },
+  {
+    name: 'SourceSerif4-VariableFont.woff2',
+    url: 'https://cdn.jsdelivr.net/npm/@fontsource-variable/source-serif-4/files/source-serif-4-latin-opsz-normal.woff2',
+  },
+  {
+    name: 'SourceSerif4-Italic-VariableFont.woff2',
+    url: 'https://cdn.jsdelivr.net/npm/@fontsource-variable/source-serif-4/files/source-serif-4-latin-opsz-italic.woff2',
+  },
 ];
 
 async function exists(path) {

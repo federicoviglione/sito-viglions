@@ -3,37 +3,23 @@ interface Props {
   siteName: string;
 }
 const { siteName } = Astro.props;
-const year = new Date().getFullYear();
-const built = new Date().toISOString().slice(0, 10);
 ---
-<footer class="footer">
-  <div class="footer-inner">
-    <span class="copy">© {year} {siteName}</span>
-    <span class="meta">
-      Last build {built} · <a href="/admin/">admin</a>
-    </span>
-  </div>
+<footer class="footer page">
+  <span>{siteName}</span>
+  <a href="/admin/">admin</a>
 </footer>
 
 <style>
   .footer {
     border-top: 1px solid var(--rule);
-    margin-top: var(--space-9);
-  }
-  .footer-inner {
-    max-width: var(--max-content);
-    margin: 0 auto;
-    padding: var(--space-5) var(--gutter);
+    margin-top: var(--space-7);
+    padding-block: var(--space-5);
     display: flex;
     justify-content: space-between;
-    gap: var(--space-4);
+    align-items: baseline;
     font-size: var(--fs-xs);
-    color: var(--muted);
+    color: var(--sub);
   }
-  .footer a { color: inherit; text-decoration: underline; }
+  .footer a { color: var(--sub); }
   .footer a:hover { color: var(--accent); }
-
-  @media (max-width: 600px) {
-    .footer-inner { flex-direction: column; align-items: start; }
-  }
 </style>
