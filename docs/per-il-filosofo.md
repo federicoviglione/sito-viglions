@@ -1,4 +1,4 @@
-# Per il filosofo — guida all'editing
+# Per Viglions — guida all'editing
 
 Benvenuto, Federico. Questa è la tua guida per aggiornare il tuo sito in autonomia. Niente codice, niente terminale: tutto avviene nel browser attraverso un piccolo pannello di amministrazione.
 
@@ -81,11 +81,13 @@ La sezione About ha uno spazio per il ritratto accanto alla bio. Per caricarlo:
 
 1. **Site** → voce esistente.
 2. Campo **Photo** → carica.
-3. Consigliato: JPG verticale, proporzioni circa 4:5 (es. 600×750 px), massimo ~500 KB. Sveltia lo comprime.
+3. Consigliato: JPG verticale, proporzioni circa 4:5 (es. 600×750 px), massimo ~500 KB. Sveltia lo comprime. Va bene anche una foto quadrata: viene ritagliata automaticamente, tenendo il volto in alto.
 4. Facoltativo: campo **Photo credit** per il nome del fotografo.
 5. **Save** → **Publish**.
 
 Se lasci vuoto il campo Photo, la sezione About mostra solo il testo — nessuna immagine rotta.
+
+> **Importante — usa il campo Photo, non il testo della bio.** Nell'editor di **Bio** c'è un pulsante per inserire immagini: se metti la foto lì, finisce *dentro* il testo, grande e sotto il paragrafo. Solo la foto caricata nel campo **Photo** di **Site** viene messa a fianco della bio sul computer (e sopra il testo sul telefono, dove non ci sarebbe spazio per affiancarla).
 
 ---
 

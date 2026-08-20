@@ -147,6 +147,8 @@ const profileLinks = [
     width: 190px;
     height: 238px;
     object-fit: cover;
+    /* Bias the crop upwards: in portraits the face sits above centre. */
+    object-position: center 30%;
     border: 1px solid var(--rule);
   }
   .portrait figcaption {
@@ -172,6 +174,14 @@ const profileLinks = [
   .bio-prose :global(p:last-child) { margin-bottom: 0; }
   .bio-prose :global(a) { color: var(--accent); border-bottom: 1px solid var(--accent-soft); }
   .bio-prose :global(a:hover) { color: var(--ink); border-color: var(--ink); }
+  /* An image pasted into the bio text (rather than the Photo field) still has
+     to behave: keep it inside the column instead of blowing up full-bleed. */
+  .bio-prose :global(img) {
+    max-width: min(260px, 100%);
+    height: auto;
+    margin-block: var(--space-4);
+    border: 1px solid var(--rule);
+  }
 
   .contact-row {
     display: flex;
