@@ -102,7 +102,7 @@ News items have a **6-month rolling window**: non-pinned items older than 6 mont
 
 ## Editor's guide
 
-Federico edits the site through Sveltia CMS at `/admin/`. The full editorial guide lives in [`docs/per-il-filosofo.md`](docs/per-il-filosofo.md) — in English, ~10 short sections covering login, adding/editing content, uploading CV and photo, pinning news, and troubleshooting.
+Federico edits the site through Sveltia CMS at `/admin/`. The full editorial guide lives in [`docs/per-il-filosofo.md`](docs/per-il-filosofo.md) — in Italian, ~11 short sections covering login, adding/editing content, uploading CV and photo, theme settings, pinning news, and troubleshooting. It references the free Netlify domain (`sito-viglions.netlify.app`) until a custom domain is set up.
 
 Send him that file when onboarding. Don't ask him to learn Markdown beyond what the CMS rich-text editor exposes.
 
@@ -203,7 +203,7 @@ All self-hosted from `public/fonts/`. Re-fetch with `npm run fetch-fonts`.
 - **No CSS framework.** Plain CSS with custom properties — fewer dependencies, easier for future-Alberto to read.
 - **Single page.** Everything is composed in `src/pages/index.astro` from section components. No client-side router, no SPA.
 - **No JavaScript in the runtime** unless absolutely necessary (the 404 easter egg is the only script).
-- **Italian for ops docs (`domain-setup.md`)**, English for editorial docs (`per-il-filosofo.md`) and code.
+- **Italian for ops docs (`domain-setup.md`) and editorial docs (`per-il-filosofo.md`)**, English for code.
 - **Commit messages:** conventional-ish — `feat:`, `fix:`, `chore:`, `docs:`, `content:`. Lowercase.
 
 ---
