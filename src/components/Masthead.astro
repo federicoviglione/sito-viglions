@@ -73,6 +73,9 @@ const rest = lastWord.slice(1);
 
   @media (max-width: 480px) {
     .masthead { padding-top: var(--space-7); }
+    /* At this width the subtitle wraps onto two lines, so it already fills
+       the space it needs — keep it closer to the rule below. */
+    .subtitle { margin-bottom: var(--space-3); }
     .rule-nav ul { column-gap: var(--space-4); }
   }
 </style>
