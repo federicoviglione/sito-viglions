@@ -25,7 +25,6 @@ collections:
           - { label: "Name", name: name, widget: string }
           - { label: "Role", name: role, widget: string, hint: "e.g. Research Affiliate, Philosophy of Science" }
           - { label: "Affiliation", name: affiliation, widget: string }
-          - { label: "Location", name: location, widget: string, required: false }
           - { label: "Tagline", name: tagline, widget: text, hint: "One-sentence description used for search engines and link previews" }
           - { label: "Email", name: email, widget: string, pattern: ['.+@.+\\..+', 'Must be a valid email'] }
           - { label: "ORCID URL", name: orcid_url, widget: string, required: false }
@@ -36,45 +35,6 @@ collections:
           - { label: "Photo", name: photo, widget: image, required: false, hint: "Portrait photo, 4:5 ratio (~600x750px) recommended" }
           - { label: "Photo credit", name: photo_credit, widget: string, required: false }
           - { label: "CV (PDF)", name: cv_pdf, widget: file, required: false, hint: "Upload CV PDF" }
-          - label: "Academic positions"
-            name: affiliations
-            widget: list
-            required: false
-            fields:
-              - { label: "Period", name: period, widget: string, hint: "e.g. 2023–2025" }
-              - { label: "Role", name: role, widget: string }
-              - { label: "Institution", name: institution, widget: string }
-              - { label: "Location", name: location, widget: string, required: false }
-              - { label: "Current", name: current, widget: boolean, default: false, required: false }
-          - label: "Education"
-            name: education
-            widget: list
-            required: false
-            fields:
-              - { label: "Period", name: period, widget: string }
-              - { label: "Degree", name: degree, widget: string }
-              - { label: "Institution", name: institution, widget: string }
-              - { label: "Location", name: location, widget: string, required: false }
-              - { label: "Thesis title", name: thesis_title, widget: string, required: false }
-              - { label: "Supervisors", name: supervisors, widget: string, required: false }
-              - { label: "Grade", name: grade, widget: string, required: false }
-          - label: "Editorial roles"
-            name: editorial_roles
-            widget: list
-            required: false
-            fields:
-              - { label: "Journal", name: journal, widget: string }
-              - { label: "Role", name: role, widget: string }
-              - { label: "URL", name: url, widget: string, required: false }
-          - label: "Memberships"
-            name: memberships
-            widget: list
-            required: false
-            fields:
-              - { label: "Name", name: name, widget: string }
-              - { label: "Role", name: role, widget: string, required: false }
-              - { label: "Period", name: period, widget: string, required: false }
-              - { label: "URL", name: url, widget: string, required: false }
           - label: "Project memberships"
             name: project_memberships
             widget: list
@@ -84,7 +44,6 @@ collections:
               - { label: "Period", name: period, widget: string }
               - { label: "Role", name: role, widget: string, required: false }
               - { label: "URL", name: url, widget: string, required: false }
-          - { label: "Peer review for", name: peer_review_for, widget: list, required: false, hint: "List of journals" }
           - label: "Selected talks (homepage)"
             name: selected_talks
             widget: relation
@@ -191,7 +150,7 @@ collections:
     identifier_field: title
     fields:
       - { label: "Title", name: title, widget: string }
-      - { label: "Authors", name: authors, widget: string, hint: "Comma-separated, e.g. Federico Viglione, Silvia De Bianchi" }
+      - { label: "Authors", name: authors, widget: string, required: false, hint: "Comma-separated. Not shown on the site — kept for your own records." }
       - { label: "Year", name: year, widget: number, value_type: int }
       - { label: "Venue", name: venue, widget: string, hint: "Journal, publisher, or proceedings" }
       - label: "Type"
@@ -217,7 +176,6 @@ collections:
       - { label: "DOI", name: doi, widget: string, required: false }
       - { label: "URL", name: url, widget: string, required: false, hint: "Link to PDF or publisher page" }
       - { label: "Abstract", name: abstract, widget: text, required: false }
-      - { label: "BibTeX", name: bibtex, widget: text, required: false }
       - { label: "Co-authors note", name: coauthors_note, widget: string, required: false, hint: "e.g. Special section co-edited with X" }
       - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
       - { label: "Body (unused)", name: body, widget: hidden, default: "" }

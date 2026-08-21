@@ -71,6 +71,8 @@ Il sito ha un bottone **Download CV** nella sezione About che punta a `/files/cv
 
 Il bottone in homepage ora punta al nuovo CV.
 
+> **Il CV completo vive nel PDF.** Il sito mostra bio, pubblicazioni, progetti e talk; posizioni accademiche, formazione, affiliazioni a società e attività di revisione non sono più elencate nella pagina — chi le vuole scarica il PDF. Tienilo quindi aggiornato: è l'unico posto dove quei dettagli compaiono.
+
 > **Nota sul nome del file:** il percorso `/files/cv.pdf` è referenziato in più punti, ma Sveltia gestisce la rinomina in modo trasparente. Puoi caricare `viglione-cv-2026.pdf` e funzionerà comunque.
 
 ---

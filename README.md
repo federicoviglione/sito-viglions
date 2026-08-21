@@ -44,12 +44,12 @@ sito-viglions/
 ├── src/
 │   ├── content/
 │   │   ├── config.ts          # Astro content collection schemas (SOURCE OF TRUTH for types)
-│   │   ├── site/              # 1 JSON entry — name, role, links, affiliations, education, theme...
+│   │   ├── site/              # 1 JSON entry — name, role, links, projects, theme...
 │   │   ├── bio/               # markdown
 │   │   ├── news/              # one md file per news item (pinned/dated)
 │   │   ├── publications/      # one md file per publication
 │   │   ├── talks/             # one md file per talk
-│   │   └── organized_events/  # one md file per event organized
+│   │   └── organized_events/  # one md file per event organized (section hidden by default)
 │   ├── components/            # Masthead, About, PublicationsSection, ProjectsSection, etc.
 │   ├── layouts/               # Base layout (head, meta, fonts)
 │   ├── pages/                 # index.astro (single-page composition) + 404.astro
@@ -94,7 +94,7 @@ The `// SYNC:` comment at the top of `src/content/config.ts` is a reminder for f
 | `talks` | content (markdown) | many | `date` desc |
 | `organized_events` | content (markdown) | many | `start_date` desc |
 
-The homepage renders `publications` under the **"Research"** heading as a bibliography grouped by type (Books, Journal articles, Book chapters, Edited volumes, Book reviews, Preprints & conference papers). The **Projects** section renders `site.project_memberships`. **News and Organized events are hidden by default** via `theme.hidden_sections` — Federico can re-enable them from the CMS Theme settings.
+The homepage renders `publications` under the **"Research"** heading as a bibliography grouped by type (Books, Journal articles, Book chapters, Edited volumes, Book reviews, Preprints & conference papers). The **Projects** section renders `site.project_memberships`. CV details (academic positions, education, editorial roles, memberships, peer review) were **removed from the site and the CMS** — they live in the CV PDF only; recover the old data from git history if ever needed. **News and Organized events are hidden by default** via `theme.hidden_sections` — Federico can re-enable them from the CMS Theme settings.
 
 News items have a **6-month rolling window**: non-pinned items older than 6 months drop off the homepage automatically. Pinned items stay forever. See `src/components/NewsSection.astro`.
 
