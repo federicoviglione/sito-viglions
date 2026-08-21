@@ -132,7 +132,7 @@ const profileLinks = [
 </section>
 
 <style>
-  .about { padding-block: var(--space-7) var(--space-6); }
+  .about { padding-block: var(--space-5) var(--space-6); }
 
   /* flow-root keeps the floated portrait inside this box, so it can never
      overlap the fact blocks below. */
@@ -232,9 +232,6 @@ const profileLinks = [
   /* Too narrow to wrap text beside the portrait: stack it above the bio,
      full width so its edges line up with the text. */
   @media (max-width: 600px) {
-    /* The full-width portrait already reads as a break after the nav rule,
-       so the section needs far less breathing room above it. */
-    .about { padding-top: var(--space-5); }
     .portrait {
       float: none;
       margin: 0 0 var(--space-5);
