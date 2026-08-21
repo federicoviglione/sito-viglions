@@ -30,6 +30,7 @@ const theme = site.data.theme ?? {
   show_photo: true,
   hero_name_size: 'default' as const,
   hidden_sections: ['news', 'organized_events'] as SectionId[],
+  hidden_about_blocks: [] as string[],
   section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'] as SectionId[],
 };
 
@@ -112,6 +113,7 @@ const htmlClass = [
           editorial_roles={site.data.editorial_roles}
           memberships={site.data.memberships}
           peer_review_for={site.data.peer_review_for}
+          hidden_blocks={theme.hidden_about_blocks}
         >
           <BioContent />
         </About>

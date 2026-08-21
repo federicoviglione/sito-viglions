@@ -60,6 +60,9 @@ const siteCollection = defineCollection({
       hidden_sections: z
         .array(z.enum(['publications', 'projects', 'talks', 'news', 'organized_events']))
         .default(['news', 'organized_events']),
+      hidden_about_blocks: z
+        .array(z.enum(['affiliations', 'education', 'editorial_roles', 'memberships', 'peer_review']))
+        .default([]),
       section_order: z
         .array(z.enum(['about', 'publications', 'projects', 'talks', 'news', 'organized_events']))
         .refine(
@@ -72,6 +75,7 @@ const siteCollection = defineCollection({
       show_photo: true,
       hero_name_size: 'default',
       hidden_sections: ['news', 'organized_events'],
+      hidden_about_blocks: [],
       section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'],
     }),
   }),

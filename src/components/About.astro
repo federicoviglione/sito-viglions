@@ -24,12 +24,20 @@ interface Props {
   editorial_roles?: EditorialRole[];
   memberships?: Membership[];
   peer_review_for?: string[];
+  hidden_blocks?: string[];
 }
 
 const {
   name, photo, photo_credit, show_photo = true, social, cv_pdf,
   affiliations, education, editorial_roles, memberships, peer_review_for,
+  hidden_blocks = [],
 } = Astro.props;
+
+// Editor-controlled: a block listed here keeps its content in the CMS but
+// stops rendering, so hiding it is reversible.
+const hidden = new Set(hidden_blocks);
+const shown = <T,>(block: string, items?: T[]): items is T[] =>
+  !hidden.has(block) && !!items && items.length > 0;
 
 const hasPhoto = show_photo && !!photo;
 
@@ -68,7 +76,7 @@ const profileLinks = [
     </div>
   </div>
 
-  {affiliations && affiliations.length > 0 && (
+  {shown('affiliations', affiliations) && (
     <div class="facts">
       <div class="group-label">Academic positions</div>
       <ul>
@@ -82,7 +90,7 @@ const profileLinks = [
     </div>
   )}
 
-  {education && education.length > 0 && (
+  {shown('education', education) && (
     <div class="facts">
       <div class="group-label">Education</div>
       <ul>
@@ -97,7 +105,7 @@ const profileLinks = [
     </div>
   )}
 
-  {editorial_roles && editorial_roles.length > 0 && (
+  {shown('editorial_roles', editorial_roles) && (
     <div class="facts">
       <div class="group-label">Editorial roles</div>
       <ul>
@@ -108,7 +116,7 @@ const profileLinks = [
     </div>
   )}
 
-  {memberships && memberships.length > 0 && (
+  {shown('memberships', memberships) && (
     <div class="facts">
       <div class="group-label">Memberships</div>
       <ul>
@@ -123,7 +131,7 @@ const profileLinks = [
     </div>
   )}
 
-  {peer_review_for && peer_review_for.length > 0 && (
+  {shown('peer_review', peer_review_for) && (
     <div class="facts">
       <div class="group-label">Peer review</div>
       <p class="peer-review">Reviewer for {peer_review_for.map((j, i) => (<><em>{j}</em>{i < peer_review_for.length - 1 ? ', ' : '.'}</>))}</p>

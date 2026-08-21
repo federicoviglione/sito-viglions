@@ -132,6 +132,19 @@ collections:
                   - { label: "Talks", value: talks }
                   - { label: "News", value: news }
                   - { label: "Organized events", value: organized_events }
+              - label: "Hidden CV blocks in About (data is kept, just not shown)"
+                name: hidden_about_blocks
+                widget: select
+                multiple: true
+                required: false
+                default: []
+                hint: "Hide the blocks between the bio and Research without deleting their content"
+                options:
+                  - { label: "Academic positions", value: affiliations }
+                  - { label: "Education", value: education }
+                  - { label: "Editorial roles", value: editorial_roles }
+                  - { label: "Memberships", value: memberships }
+                  - { label: "Peer review", value: peer_review }
               - label: "Section order on homepage (drag to reorder)"
                 name: section_order
                 widget: list

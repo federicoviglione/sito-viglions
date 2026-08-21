@@ -99,6 +99,7 @@ In fondo a **Site** → voce esistente c'è il pannello **Theme settings**. Qui 
 - **Show portrait photo in About** — disattiva la foto se preferisci solo testo.
 - **Name size in the header** — compact / default / large.
 - **Hidden sections** — le sezioni in questa lista esistono nel CMS ma non compaiono sul sito. **News e Organized events sono nascoste di default**; toglile dalla lista per farle apparire in homepage.
+- **Hidden CV blocks in About** — nasconde i blocchi che stanno tra la bio e Research: *Academic positions*, *Education*, *Editorial roles*, *Memberships*, *Peer review*. Aggiungi alla lista quelli che non vuoi mostrare. I contenuti **restano salvati** nel CMS: se cambi idea basta toglierli dalla lista e ricompaiono, senza doverli riscrivere.
 - **Section order** — trascina per riordinare le sezioni della homepage.
 
 Come sempre: **Save** → **Publish**, aspetta un paio di minuti, ricarica.
@@ -161,6 +162,7 @@ Tutto ciò che modifichi dal CMS è salvato come file di testo in un repository 
 |------|---------|--------|
 | Aggiornare bio / affiliazione | Site → voce | Modifica i campi → Save → Publish |
 | Cambiare colori / sezioni visibili | Site → Theme settings | Scegli la palette, modifica le sezioni nascoste → Save → Publish |
+| Nascondere posizioni, formazione, ecc. | Site → Theme settings → Hidden CV blocks | Aggiungi i blocchi da nascondere → Save → Publish |
 | Aggiungere una pubblicazione | Publications → New | Compila i campi → Save → Publish |
 | Aggiungere un talk | Talks → New | Compila i campi → Save → Publish |
 | Aggiungere una news | News → New | Scegli il tipo (upcoming/recent/award/visit) → Save → Publish |

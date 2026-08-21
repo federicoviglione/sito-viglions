@@ -41,6 +41,7 @@
     "show_photo": true,
     "hero_name_size": "default",
     "hidden_sections": ["news", "organized_events"],
+    "hidden_about_blocks": [],
     "section_order": ["about", "publications", "projects", "talks", "news", "organized_events"]
   }
 }
