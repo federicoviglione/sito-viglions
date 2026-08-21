@@ -1,0 +1,143 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+const site = await getEntry('site', 'info');
+const siteName = site?.data.name ?? 'Federico Viglione';
+
+const all = await getCollection('talks');
+const sorted = all.sort((a, b) => (b.data.date as Date).getTime() - (a.data.date as Date).getTime());
+
+type Talk = (typeof sorted)[number];
+
+// One group per year, newest first.
+const byYear: { year: number; items: Talk[] }[] = [];
+for (const talk of sorted) {
+  const year = (talk.data.date as Date).getFullYear();
+  const last = byYear[byYear.length - 1];
+  if (last && last.year === year) last.items.push(talk);
+  else byYear.push({ year, items: [talk] });
+}
+
+const typeLabels: Record<string, string> = {
+  invited: 'Invited',
+  contributed: 'Contributed',
+  keynote: 'Keynote',
+  seminar: 'Seminar',
+  workshop: 'Workshop',
+};
+
+function fmtDate(d: Date) {
+  return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+const theme = site?.data.theme;
+const htmlClass = [
+  theme && theme.palette !== 'bianca' && `palette-${theme.palette}`,
+  theme && theme.hero_name_size !== 'default' && `hero-name-${theme.hero_name_size}`,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<Layout
+  title={`Talks — ${siteName}`}
+  description={`Complete list of talks, seminars, and conference presentations by ${siteName}.`}
+  htmlClass={htmlClass}
+>
+  <main class="talks-page page">
+    <p class="back"><a href="/">← {siteName}</a></p>
+    <h1 class="page-title">Talks</h1>
+    <p class="intro">Complete list of talks, seminars, and conference presentations.</p>
+
+    {byYear.map(group => (
+      <section class="year">
+        <div class="group-label">{group.year}</div>
+        <div class="list">
+          {group.items.map(t => (
+            <div class="talk">
+              <span class="date">{fmtDate(t.data.date as Date)}</span>
+              <span class="body">
+                <span class="title">
+                  {t.data.url ? <a href={t.data.url} target="_blank" rel="noopener noreferrer">{t.data.title}</a> : t.data.title}
+                </span>
+                <span class="venue"> — {t.data.venue}{t.data.location ? `, ${t.data.location}` : ''}</span>
+                <span class="kind"> · {typeLabels[t.data.type] ?? t.data.type}</span>
+                {(t.data.slides_url || t.data.video_url) && (
+                  <span class="links">
+                    {t.data.slides_url && <a href={t.data.slides_url} target="_blank" rel="noopener noreferrer">Slides</a>}
+                    {t.data.video_url && <a href={t.data.video_url} target="_blank" rel="noopener noreferrer">Video</a>}
+                  </span>
+                )}
+                {t.data.abstract && (
+                  <details class="abstract">
+                    <summary>Abstract</summary>
+                    <p>{t.data.abstract}</p>
+                  </details>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      </section>
+    ))}
+  </main>
+</Layout>
+
+<style>
+  .talks-page { padding-block: var(--space-7); }
+  .back { font-size: var(--fs-sm); margin-bottom: var(--space-5); }
+  .back a { color: var(--muted); }
+  .back a:hover { color: var(--accent); }
+  .page-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-section);
+    font-weight: 500;
+    margin-bottom: var(--space-2);
+  }
+  .intro {
+    color: var(--muted);
+    font-size: var(--fs-sm);
+    margin-bottom: var(--space-6);
+  }
+  .year {
+    border-top: 1px solid var(--rule);
+    padding-block: var(--space-5);
+  }
+  .group-label { margin-bottom: var(--space-4); }
+  .list { display: flex; flex-direction: column; gap: var(--space-4); }
+  .talk {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: var(--space-4);
+    align-items: baseline;
+  }
+  .date {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .title { font-family: var(--font-serif); font-size: var(--fs-bib); color: var(--ink); }
+  .title a { color: var(--ink); border-bottom: 1px solid var(--rule); }
+  .title a:hover { color: var(--accent); border-color: var(--accent-soft); }
+  .venue { color: var(--muted); font-size: var(--fs-sm); }
+  .kind { color: var(--sub); font-size: var(--fs-xs); }
+  .links { margin-left: var(--space-2); font-size: var(--fs-xs); }
+  .links a { color: var(--accent); margin-right: var(--space-2); border-bottom: 1px solid var(--accent-soft); }
+  .links a:hover { color: var(--ink); border-color: var(--ink); }
+  .abstract { margin-top: var(--space-2); font-size: var(--fs-sm); }
+  .abstract summary {
+    cursor: pointer;
+    color: var(--sub);
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .abstract summary:hover { color: var(--accent); }
+  .abstract p { margin-top: var(--space-2); color: var(--muted); max-width: 62ch; line-height: 1.6; }
+
+  @media (max-width: 480px) {
+    .talk { grid-template-columns: 1fr; gap: 2px; }
+  }
+</style>
