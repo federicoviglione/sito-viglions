@@ -43,10 +43,10 @@ const profileLinks = [
 ---
 
 <section id="about" class="about page">
-  <div class:list={['about-grid', { 'no-photo': !hasPhoto }]}>
+  <div class="about-grid">
     {hasPhoto && (
       <figure class="portrait">
-        <img src={photo} alt={`Portrait of ${name}`} width={190} height={238} loading="eager" />
+        <img src={photo} alt={`Portrait of ${name}`} width={220} height={275} loading="eager" />
         {photo_credit && <figcaption>{photo_credit}</figcaption>}
       </figure>
     )}
@@ -132,20 +132,19 @@ const profileLinks = [
 </section>
 
 <style>
-  .about { padding-block: var(--space-7) var(--space-6); }
+  .about { padding-block: var(--space-5) var(--space-6); }
 
-  .about-grid {
-    display: grid;
-    grid-template-columns: 190px 1fr;
-    gap: var(--space-6);
-    align-items: start;
+  /* flow-root keeps the floated portrait inside this box, so it can never
+     overlap the fact blocks below. */
+  .about-grid { display: flow-root; }
+
+  .portrait {
+    float: left;
+    margin: 5px var(--space-6) var(--space-4) 0;
   }
-  .about-grid.no-photo { grid-template-columns: 1fr; }
-
-  .portrait { margin: 0; }
   .portrait img {
-    width: 190px;
-    height: 238px;
+    width: 220px;
+    height: 275px;
     object-fit: cover;
     /* Bias the crop upwards: in portraits the face sits above centre. */
     object-position: center 30%;
@@ -159,11 +158,8 @@ const profileLinks = [
     color: var(--muted);
   }
 
-  .bio {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
+  /* Plain blocks, not flex: a flex container would sit beside the float
+     instead of letting the text wrap under the portrait. */
   .bio-prose {
     font-family: var(--font-serif);
     font-size: var(--fs-serif);
@@ -189,7 +185,11 @@ const profileLinks = [
     justify-content: space-between;
     gap: var(--space-4);
     flex-wrap: wrap;
-    margin-top: var(--space-1);
+    /* Being a flex container it cannot wrap around the float, so drop it
+       below the portrait rather than squeezing it into the leftover width. */
+    clear: left;
+    margin-top: var(--space-4);
+    margin-bottom: var(--space-4);
   }
   .email { font-size: var(--fs-base); color: var(--muted); }
   .email a { color: var(--accent); }
@@ -211,6 +211,7 @@ const profileLinks = [
     list-style: none;
     display: flex;
     flex-wrap: wrap;
+    clear: left;
     gap: var(--space-2) var(--space-4);
     font-size: var(--fs-sm);
   }
@@ -228,8 +229,17 @@ const profileLinks = [
   .facts a { color: var(--accent); }
   .peer-review { font-size: var(--fs-sm); }
 
+  /* Too narrow to wrap text beside the portrait: stack it above the bio,
+     full width so its edges line up with the text. */
   @media (max-width: 600px) {
-    .about-grid { grid-template-columns: 1fr; }
-    .portrait { margin-inline: auto; }
+    .portrait {
+      float: none;
+      margin: 0 0 var(--space-5);
+    }
+    .portrait img {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 4 / 5;
+    }
   }
 </style>
