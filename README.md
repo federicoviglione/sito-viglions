@@ -46,10 +46,8 @@ sito-viglions/
 │   │   ├── config.ts          # Astro content collection schemas (SOURCE OF TRUTH for types)
 │   │   ├── site/              # 1 JSON entry — name, role, links, projects, theme...
 │   │   ├── bio/               # markdown
-│   │   ├── news/              # one md file per news item (pinned/dated)
 │   │   ├── publications/      # one md file per publication
-│   │   ├── talks/             # one md file per talk
-│   │   └── organized_events/  # one md file per event organized (section hidden by default)
+│   │   └── talks/             # one md file per talk
 │   ├── components/            # Masthead, About, PublicationsSection, ProjectsSection, etc.
 │   ├── layouts/               # Base layout (head, meta, fonts)
 │   ├── pages/                 # index.astro (single-page composition) + 404.astro
@@ -89,20 +87,18 @@ The `// SYNC:` comment at the top of `src/content/config.ts` is a reminder for f
 |---|---|---|---|
 | `site` | data (JSON) | 1 entry | n/a |
 | `bio` | content (markdown) | 1 entry | n/a |
-| `news` | content (markdown) | many | `date` desc, `pinned` first |
 | `publications` | content (markdown) | many | grouped by `type`, then `year` desc, then `order` |
 | `talks` | content (markdown) | many | `date` desc |
-| `organized_events` | content (markdown) | many | `start_date` desc |
 
-The homepage renders `publications` under the **"Research"** heading as a bibliography grouped by type (Books, Journal articles, Book chapters, Edited volumes, Book reviews, Preprints & conference papers). The **Projects** section renders `site.project_memberships`. CV details (academic positions, education, editorial roles, memberships, peer review) were **removed from the site and the CMS** — they live in the CV PDF only; recover the old data from git history if ever needed. **News and Organized events are hidden by default** via `theme.hidden_sections` — Federico can re-enable them from the CMS Theme settings.
+The homepage renders `publications` under the **"Research"** heading as a bibliography grouped by type (Books, Journal articles, Book chapters, Edited volumes, Book reviews, Preprints & conference papers). The **Projects** section renders `site.project_memberships`. CV details (academic positions, education, editorial roles, memberships, peer review) were **removed from the site and the CMS** — they live in the CV PDF only; recover the old data from git history if ever needed.
 
-News items have a **6-month rolling window**: non-pinned items older than 6 months drop off the homepage automatically. Pinned items stay forever. See `src/components/NewsSection.astro`.
+The `news` and `organized_events` collections were removed along with their CMS entries and content files; recover them from git history if they are ever wanted back.
 
 ---
 
 ## Editor's guide
 
-Federico edits the site through Sveltia CMS at `/admin/`. The full editorial guide lives in [`docs/per-il-filosofo.md`](docs/per-il-filosofo.md) — in Italian, ~11 short sections covering login, adding/editing content, uploading CV and photo, theme settings, pinning news, and troubleshooting. It references the free Netlify domain (`sito-viglions.netlify.app`) until a custom domain is set up.
+Federico edits the site through Sveltia CMS at `/admin/`. The full editorial guide lives in [`docs/per-il-filosofo.md`](docs/per-il-filosofo.md) — in Italian, ~10 short sections covering login, adding/editing content, uploading CV and photo, theme settings, and troubleshooting. It references the free Netlify domain (`sito-viglions.netlify.app`) until a custom domain is set up.
 
 Send him that file when onboarding. Don't ask him to learn Markdown beyond what the CMS rich-text editor exposes.
 

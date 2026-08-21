@@ -29,21 +29,21 @@ const siteCollection = defineCollection({
       show_photo: z.boolean().default(true),
       hero_name_size: z.enum(['compact', 'default', 'large']).default('default'),
       hidden_sections: z
-        .array(z.enum(['publications', 'projects', 'talks', 'news', 'organized_events']))
-        .default(['news', 'organized_events']),
+        .array(z.enum(['publications', 'projects', 'talks']))
+        .default([]),
       section_order: z
-        .array(z.enum(['about', 'publications', 'projects', 'talks', 'news', 'organized_events']))
+        .array(z.enum(['about', 'publications', 'projects', 'talks']))
         .refine(
           (arr) => arr.includes('about'),
           { message: "section_order must include 'about'" }
         )
-        .default(['about', 'publications', 'projects', 'talks', 'news', 'organized_events']),
+        .default(['about', 'publications', 'projects', 'talks']),
     }).default({
       palette: 'bianca',
       show_photo: true,
       hero_name_size: 'default',
-      hidden_sections: ['news', 'organized_events'],
-      section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'],
+      hidden_sections: [],
+      section_order: ['about', 'publications', 'projects', 'talks'],
     }),
   }),
 });
@@ -52,18 +52,6 @@ const bioCollection = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-  }),
-});
-
-const newsCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    date: z.coerce.date(),
-    kind: z.enum(['upcoming', 'recent', 'award', 'visit']),
-    summary: z.string(),
-    url: z.string().url().or(z.literal('')).optional(),
-    pinned: z.boolean().default(false),
   }),
 });
 
@@ -113,27 +101,9 @@ const talksCollection = defineCollection({
   }),
 });
 
-const organizedEventsCollection = defineCollection({
-  type: 'content',
-  schema: z.object({
-    title: z.string(),
-    role: z.enum(['organizer', 'co-organizer', 'program-committee', 'coordinator', 'committee-member']),
-    venue: z.string(),
-    location: z.string().optional(),
-    start_date: z.coerce.date(),
-    end_date: z.coerce.date().optional(),
-    url: z.string().url().or(z.literal('')).optional(),
-    co_organizers: z.string().optional(),
-    description: z.string().optional(),
-    order: z.number().default(99),
-  }),
-});
-
 export const collections = {
   site: siteCollection,
   bio: bioCollection,
-  news: newsCollection,
   publications: publicationsCollection,
   talks: talksCollection,
-  organized_events: organizedEventsCollection,
 };

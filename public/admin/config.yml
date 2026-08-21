@@ -84,17 +84,15 @@ collections:
                 widget: select
                 multiple: true
                 required: false
-                default: [news, organized_events]
+                default: []
                 options:
                   - { label: "Research (publications)", value: publications }
                   - { label: "Projects", value: projects }
                   - { label: "Talks", value: talks }
-                  - { label: "News", value: news }
-                  - { label: "Organized events", value: organized_events }
               - label: "Section order on homepage (drag to reorder)"
                 name: section_order
                 widget: list
-                default: [about, publications, projects, talks, news, organized_events]
+                default: [about, publications, projects, talks]
                 field:
                   label: Section
                   name: id
@@ -104,9 +102,7 @@ collections:
                     - { label: "Research (publications)", value: publications }
                     - { label: "Projects", value: projects }
                     - { label: "Talks", value: talks }
-                    - { label: "News", value: news }
-                    - { label: "Organized events", value: organized_events }
-
+    
   - name: bio
     label: Bio
     label_singular: Bio
@@ -117,29 +113,6 @@ collections:
         fields:
           - { label: "Title", name: title, widget: hidden, default: "About" }
           - { label: "Body", name: body, widget: markdown }
-
-  - name: news
-    label: News
-    label_singular: News item
-    folder: src/content/news
-    create: true
-    slug: "{{slug}}"
-    identifier_field: title
-    fields:
-      - { label: "Title", name: title, widget: string }
-      - { label: "Date", name: date, widget: datetime, type: date }
-      - label: "Kind"
-        name: kind
-        widget: select
-        options:
-          - { label: "Upcoming event", value: upcoming }
-          - { label: "Recent event", value: recent }
-          - { label: "Award", value: award }
-          - { label: "Research visit", value: visit }
-      - { label: "Summary", name: summary, widget: text }
-      - { label: "URL", name: url, widget: string, required: false }
-      - { label: "Pinned", name: pinned, widget: boolean, default: false, hint: "Always show at the top, even if old" }
-      - { label: "Body (unused)", name: body, widget: hidden, default: "" }
 
   - name: publications
     label: Publications
@@ -207,30 +180,3 @@ collections:
       - { label: "Abstract", name: abstract, widget: text, required: false }
       - { label: "Body (unused)", name: body, widget: hidden, default: "" }
 
-  - name: organized_events
-    label: Organized Events
-    label_singular: Organized event
-    folder: src/content/organized_events
-    create: true
-    slug: "{{year}}-{{month}}-{{slug}}"
-    identifier_field: title
-    fields:
-      - { label: "Title", name: title, widget: string }
-      - label: "Role"
-        name: role
-        widget: select
-        options:
-          - { label: "Organizer", value: organizer }
-          - { label: "Co-organizer", value: co-organizer }
-          - { label: "Program committee", value: program-committee }
-          - { label: "Coordinator", value: coordinator }
-          - { label: "Committee member", value: committee-member }
-      - { label: "Venue", name: venue, widget: string }
-      - { label: "Location", name: location, widget: string, required: false }
-      - { label: "Start date", name: start_date, widget: datetime, type: date }
-      - { label: "End date", name: end_date, widget: datetime, type: date, required: false }
-      - { label: "URL", name: url, widget: string, required: false }
-      - { label: "Co-organizers", name: co_organizers, widget: string, required: false }
-      - { label: "Description", name: description, widget: text, required: false }
-      - { label: "Order", name: order, widget: number, value_type: int, default: 99 }
-      - { label: "Body (unused)", name: body, widget: hidden, default: "" }

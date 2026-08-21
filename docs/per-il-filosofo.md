@@ -13,7 +13,7 @@ Se qualcosa qui sotto non è chiaro o smette di funzionare, scrivi ad Alberto (a
 1. Vai su https://sito-viglions.netlify.app/admin/.
 2. Clicca **Sign in with GitHub** e autorizza con l'account GitHub che Alberto ha invitato al repository.
 
-Una volta dentro vedrai l'interfaccia di **Sveltia CMS**: una barra laterale a sinistra con tutte le sezioni del sito (Site, Bio, News, Publications, Talks, Organized events) e un'area principale dove si modifica.
+Una volta dentro vedrai l'interfaccia di **Sveltia CMS**: una barra laterale a sinistra con tutte le sezioni del sito (Site, Bio, Publications, Talks) e un'area principale dove si modifica.
 
 > Se compare un errore di autenticazione, esci (in alto a destra) e riaccedi. A volte Sveltia tiene in cache una sessione scaduta.
 
@@ -50,11 +50,11 @@ Il flusso è lo stesso per ogni sezione. Esempio: un nuovo talk.
    - **Abstract** — facoltativo, qualche frase
 3. **Save** → **Publish**.
 
-Lo stesso flusso vale per **Publications**, **News** e **Organized events**. I campi obbligatori sono contrassegnati da un asterisco; il pannello non lascia salvare finché non sono compilati.
+Lo stesso flusso vale per le **Publications**. I campi obbligatori sono contrassegnati da un asterisco; il pannello non lascia salvare finché non sono compilati.
 
 > **Le pubblicazioni compaiono sul sito sotto il titolo "Research"**, raggruppate automaticamente per tipo: Books, Journal articles, Book chapters, Edited volumes e così via. Basta impostare correttamente il campo **Type** e la voce finisce nel gruppo giusto.
 
-> **Suggerimento — campi `order`:** Publications e Organized events hanno un campo **Order** facoltativo. I numeri più bassi compaiono prima *a parità di anno*. Lascialo al valore predefinito (99) a meno che tu non voglia forzare un ordine preciso.
+> **Suggerimento — campo `order`:** le Publications hanno un campo **Order** facoltativo. I numeri più bassi compaiono prima *a parità di anno*. Lascialo al valore predefinito (99) a meno che tu non voglia forzare un ordine preciso.
 
 ---
 
@@ -100,30 +100,14 @@ In fondo a **Site** → voce esistente c'è il pannello **Theme settings**. Qui 
 - **Palette** — lo schema colori complessivo (carta, testo e colore d'accento cambiano insieme). Il default è *Bianca granata* (carta bianca, accento granata); le alternative sono *Bordeaux*, *Blu editoriale*, *Foresta* e *Ambra*.
 - **Show portrait photo in About** — disattiva la foto se preferisci solo testo.
 - **Name size in the header** — compact / default / large.
-- **Hidden sections** — le sezioni in questa lista esistono nel CMS ma non compaiono sul sito. **News e Organized events sono nascoste di default**; toglile dalla lista per farle apparire in homepage.
+- **Hidden sections** — le sezioni in questa lista esistono nel CMS ma non compaiono sul sito. Normalmente è vuota: serve se un giorno vuoi togliere temporaneamente Research, Projects o Talks dalla homepage.
 - **Section order** — trascina per riordinare le sezioni della homepage.
 
 Come sempre: **Save** → **Publish**, aspetta un paio di minuti, ricarica.
 
 ---
 
-## 7. Fissare una news in alto (pin)
-
-Alcune news meritano di restare visibili anche dopo che la data è passata (es. un premio importante, un evento in arrivo che vuoi mettere in evidenza). Contrassegnale come **pinned**:
-
-1. **News** → apri la voce.
-2. Attiva l'interruttore **Pinned**.
-3. **Save** → **Publish**.
-
-Le voci pinned restano nella sezione News per sempre. Quelle non pinned spariscono da sole quando la data è più vecchia di ~6 mesi — la sezione si cura da sola.
-
-> **Quando fare pin:** premi, borse, contratti per libri, posizioni in visita. **Quando non farlo:** talk di routine (compaiono comunque sotto Talks), seminari locali, post da blog.
-
-> **Nota:** la sezione News è nascosta in homepage di default. Per mostrarla, togli "News" da **Hidden sections** nelle Theme settings (vedi sezione 6).
-
----
-
-## 8. Cosa succede dopo aver cliccato Publish
+## 7. Cosa succede dopo aver cliccato Publish
 
 Dietro le quinte:
 
@@ -136,7 +120,7 @@ Puoi continuare a lavorare nel CMS mentre una build è in corso — la modifica 
 
 ---
 
-## 9. Problemi — il sito non si aggiorna dopo 2 minuti
+## 8. Problemi — il sito non si aggiorna dopo 2 minuti
 
 Nel 99% dei casi è una cache. Prova in questo ordine:
 
@@ -147,7 +131,7 @@ Nel 99% dei casi è una cache. Prova in questo ordine:
 
 ---
 
-## 10. Dove vivono i contenuti
+## 9. Dove vivono i contenuti
 
 Tutto ciò che modifichi dal CMS è salvato come file di testo in un repository GitHub (`sito-viglions`). Non devi interagire con GitHub — se ne occupa Sveltia — ma saperlo significa che:
 
@@ -157,7 +141,7 @@ Tutto ciò che modifichi dal CMS è salvato come file di testo in un repository 
 
 ---
 
-## 11. Riferimento rapido
+## 10. Riferimento rapido
 
 | Attività | Sezione | Azione |
 |------|---------|--------|
@@ -165,10 +149,8 @@ Tutto ciò che modifichi dal CMS è salvato come file di testo in un repository 
 | Cambiare colori / sezioni visibili | Site → Theme settings | Scegli la palette, modifica le sezioni nascoste → Save → Publish |
 | Aggiungere una pubblicazione | Publications → New | Compila i campi → Save → Publish |
 | Aggiungere un talk | Talks → New | Compila i campi → Save → Publish |
-| Aggiungere una news | News → New | Scegli il tipo (upcoming/recent/award/visit) → Save → Publish |
 | Sostituire il CV | Site → CV PDF | Carica il nuovo PDF → Save → Publish |
 | Cambiare la foto | Site → Photo | Carica la nuova immagine → Save → Publish |
-| Evidenziare una news per sempre | News → voce | Attiva Pinned → Save → Publish |
 
 ---
 

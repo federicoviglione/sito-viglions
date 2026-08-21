@@ -5,8 +5,6 @@ import About from '../components/About.astro';
 import PublicationsSection from '../components/PublicationsSection.astro';
 import ProjectsSection from '../components/ProjectsSection.astro';
 import TalksSection from '../components/TalksSection.astro';
-import NewsSection from '../components/NewsSection.astro';
-import OrganizedEventsSection from '../components/OrganizedEventsSection.astro';
 import { getEntry, getCollection, render } from 'astro:content';
 
 const site = await getEntry('site', 'info');
@@ -16,21 +14,19 @@ const bio = await getEntry('bio', 'main');
 if (!bio) throw new Error('Missing bio/main content entry');
 const { Content: BioContent } = await render(bio);
 
-const news = await getCollection('news');
 const publications = await getCollection('publications');
 const talks = await getCollection('talks');
-const organizedEvents = await getCollection('organized_events');
 const projects = site.data.project_memberships ?? [];
 
-type SectionId = 'about' | 'publications' | 'projects' | 'talks' | 'news' | 'organized_events';
+type SectionId = 'about' | 'publications' | 'projects' | 'talks';
 
 // Zod gives us defaults, but keep a defensive fallback in case of unusual schema state.
 const theme = site.data.theme ?? {
   palette: 'bianca' as const,
   show_photo: true,
   hero_name_size: 'default' as const,
-  hidden_sections: ['news', 'organized_events'] as SectionId[],
-  section_order: ['about', 'publications', 'projects', 'talks', 'news', 'organized_events'] as SectionId[],
+  hidden_sections: [] as SectionId[],
+  section_order: ['about', 'publications', 'projects', 'talks'] as SectionId[],
 };
 
 const hidden = new Set<string>(theme.hidden_sections);
@@ -40,8 +36,6 @@ const hasContent: Record<SectionId, boolean> = {
   publications: publications.length > 0,
   projects: projects.length > 0,
   talks: talks.length > 0,
-  news: news.length > 0,
-  organized_events: organizedEvents.length > 0,
 };
 
 const navLabels: Record<SectionId, string> = {
@@ -49,8 +43,6 @@ const navLabels: Record<SectionId, string> = {
   publications: 'Research',
   projects: 'Projects',
   talks: 'Talks',
-  news: 'News',
-  organized_events: 'Events',
 };
 
 // DOM anchor ids (publications renders as the "Research" bibliography).
@@ -59,8 +51,6 @@ const anchorIds: Record<SectionId, string> = {
   publications: 'research',
   projects: 'projects',
   talks: 'talks',
-  news: 'news',
-  organized_events: 'organized-events',
 };
 
 const visibleSections: SectionId[] = (theme.section_order as SectionId[]).filter(
@@ -114,8 +104,6 @@ const htmlClass = [
       if (id === 'publications') return <PublicationsSection />;
       if (id === 'projects') return <ProjectsSection projects={projects} />;
       if (id === 'talks') return <TalksSection />;
-      if (id === 'news') return <NewsSection />;
-      if (id === 'organized_events') return <OrganizedEventsSection />;
       return null;
     })}
   </main>

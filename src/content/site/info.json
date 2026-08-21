@@ -21,7 +21,7 @@
     "palette": "bianca",
     "show_photo": true,
     "hero_name_size": "default",
-    "hidden_sections": ["news", "organized_events"],
-    "section_order": ["about", "publications", "projects", "talks", "news", "organized_events"]
+    "hidden_sections": [],
+    "section_order": ["about", "publications", "projects", "talks"]
   }
 }
