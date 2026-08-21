@@ -2,7 +2,6 @@
   "name": "Federico Viglione",
   "role": "Philosophy of Science",
   "affiliation": "Università degli Studi di Torino",
-  "location": "Turin, Italy",
   "tagline": "Working on the metaphysics of time, the philosophy of cosmology, and the philosophical foundations of mathematics.",
   "email": "federico.viglione@unimi.it",
   "orcid_url": "",
@@ -13,34 +12,16 @@
   "photo": "/uploads/federico.jpg",
   "photo_credit": "",
   "cv_pdf": "/files/cv.pdf",
-  "affiliations": [
-    { "period": "2026–present", "role": "Research Affiliate (Cultore della Materia)", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "current": true },
-    { "period": "2023–2025", "role": "Postdoctoral Fellow (Assegnista di Ricerca di Tipo B)", "institution": "Università degli Studi di Milano", "location": "Milan, Italy" },
-    { "period": "2018–2022", "role": "Predoctoral Researcher (Investigador Predoctoral)", "institution": "Universitat Autònoma de Barcelona", "location": "Barcelona, Spain" }
-  ],
-  "education": [
-    { "period": "2018–2022", "degree": "PhD in Philosophy", "institution": "Universitat Autònoma de Barcelona", "location": "Barcelona, Spain", "thesis_title": "Time and Chances before the Changing Universe. A Metaphysical Inquiry", "supervisors": "Silvia De Bianchi; Giuliano Torrengo", "grade": "Cum laude" },
-    { "period": "2015–2018", "degree": "Laurea magistrale in Philosophy", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "thesis_title": "Did time and world begin? Contemporary philosophical perspectives", "supervisors": "Vincenzo Crupi; Giuliano Torrengo", "grade": "110/110 e lode" },
-    { "period": "2011–2015", "degree": "Laurea triennale in Philosophy", "institution": "Università degli Studi di Torino", "location": "Turin, Italy", "thesis_title": "Indeterminism and probability in Karl Popper's Postscript. An indeterministic interpretation of quantum reality", "supervisors": "Vincenzo Crupi", "grade": "106/110" }
-  ],
-  "editorial_roles": [],
-  "memberships": [
-    { "name": "European Philosophy of Science Association", "period": "2025–2027" },
-    { "name": "American Philosophical Association", "period": "2025–2026" },
-    { "name": "Philosophy of Time Society", "period": "2024–present" },
-    { "name": "Centre for the Philosophy of Time", "period": "2018–present" }
-  ],
   "project_memberships": [
     { "name": "COSMOS: History & Philosophy of Cosmology Network", "period": "2023–present" },
     { "name": "CHRONOS: Rethinking and Communicating Time", "period": "2020–2024" },
     { "name": "PROTEUS: Paradoxes and Metaphors of Time in Early Universe(s) (ERC Starting Grant)", "period": "2018–2023" }
   ],
-  "peer_review_for": ["Mind", "Synthese", "Journal for General Philosophy of Science", "Studies in History and Philosophy of Science"],
   "theme": {
     "palette": "bianca",
     "show_photo": true,
     "hero_name_size": "default",
-    "hidden_sections": ["news", "organized_events"],
-    "section_order": ["about", "publications", "projects", "talks", "news", "organized_events"]
+    "hidden_sections": [],
+    "section_order": ["about", "publications", "projects", "talks"]
   }
 }

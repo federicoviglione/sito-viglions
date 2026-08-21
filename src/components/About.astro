@@ -1,8 +1,4 @@
 ---
-interface Affiliation { period: string; role: string; institution: string; location?: string; current?: boolean; }
-interface Education { period: string; degree: string; institution: string; location?: string; thesis_title?: string; supervisors?: string; grade?: string; }
-interface EditorialRole { journal: string; role: string; url?: string; }
-interface Membership { name: string; role?: string; period?: string; url?: string; }
 interface SocialLinks {
   email: string;
   orcid_url?: string;
@@ -19,17 +15,9 @@ interface Props {
   show_photo?: boolean;
   social: SocialLinks;
   cv_pdf?: string;
-  affiliations?: Affiliation[];
-  education?: Education[];
-  editorial_roles?: EditorialRole[];
-  memberships?: Membership[];
-  peer_review_for?: string[];
 }
 
-const {
-  name, photo, photo_credit, show_photo = true, social, cv_pdf,
-  affiliations, education, editorial_roles, memberships, peer_review_for,
-} = Astro.props;
+const { name, photo, photo_credit, show_photo = true, social, cv_pdf } = Astro.props;
 
 const hasPhoto = show_photo && !!photo;
 
@@ -68,67 +56,6 @@ const profileLinks = [
     </div>
   </div>
 
-  {affiliations && affiliations.length > 0 && (
-    <div class="facts">
-      <div class="group-label">Academic positions</div>
-      <ul>
-        {affiliations.map(a => (
-          <li>
-            <span class="period">{a.period}</span>
-            {a.role}, {a.institution}{a.location ? `, ${a.location}` : ''}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-
-  {education && education.length > 0 && (
-    <div class="facts">
-      <div class="group-label">Education</div>
-      <ul>
-        {education.map(e => (
-          <li>
-            <span class="period">{e.period}</span>
-            {e.degree}, {e.institution}{e.location ? `, ${e.location}` : ''}
-            {e.thesis_title && <div class="thesis"><em>“{e.thesis_title}”</em>{e.supervisors ? ` — Supervisors: ${e.supervisors}` : ''}{e.grade ? ` (${e.grade})` : ''}</div>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-
-  {editorial_roles && editorial_roles.length > 0 && (
-    <div class="facts">
-      <div class="group-label">Editorial roles</div>
-      <ul>
-        {editorial_roles.map(r => (
-          <li>{r.role}, {r.url ? <a href={r.url} target="_blank" rel="noopener noreferrer"><em>{r.journal}</em></a> : <em>{r.journal}</em>}</li>
-        ))}
-      </ul>
-    </div>
-  )}
-
-  {memberships && memberships.length > 0 && (
-    <div class="facts">
-      <div class="group-label">Memberships</div>
-      <ul>
-        {memberships.map(m => (
-          <li>
-            {m.period && <span class="period">{m.period}</span>}
-            {m.url ? <a href={m.url} target="_blank" rel="noopener noreferrer">{m.name}</a> : m.name}
-            {m.role ? `, ${m.role}` : ''}
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-
-  {peer_review_for && peer_review_for.length > 0 && (
-    <div class="facts">
-      <div class="group-label">Peer review</div>
-      <p class="peer-review">Reviewer for {peer_review_for.map((j, i) => (<><em>{j}</em>{i < peer_review_for.length - 1 ? ', ' : '.'}</>))}</p>
-    </div>
-  )}
 </section>
 
 <style>
@@ -218,16 +145,6 @@ const profileLinks = [
   .profiles a { color: var(--accent); border-bottom: 1px solid var(--accent-soft); padding-bottom: 1px; }
   .profiles a:hover { color: var(--ink); border-color: var(--ink); }
 
-  .facts { margin-top: var(--space-5); }
-  .facts .group-label { margin-bottom: var(--space-2); }
-  .facts ul { list-style: none; font-size: var(--fs-sm); line-height: 1.6; }
-  .facts li { margin-bottom: var(--space-2); }
-  .facts li:last-child { margin-bottom: 0; }
-  .facts em { color: var(--muted); }
-  .facts .period { color: var(--muted); font-family: var(--font-mono); font-size: 12px; margin-right: var(--space-2); }
-  .facts .thesis { color: var(--muted); }
-  .facts a { color: var(--accent); }
-  .peer-review { font-size: var(--fs-sm); }
 
   /* Too narrow to wrap text beside the portrait: stack it above the bio,
      full width so its edges line up with the text. */
