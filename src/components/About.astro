@@ -46,7 +46,7 @@ const profileLinks = [
   <div class="about-grid">
     {hasPhoto && (
       <figure class="portrait">
-        <img src={photo} alt={`Portrait of ${name}`} width={220} height={275} loading="eager" />
+        <img src={photo} alt={`Portrait of ${name}`} width={300} height={375} loading="eager" />
         {photo_credit && <figcaption>{photo_credit}</figcaption>}
       </figure>
     )}
@@ -143,8 +143,8 @@ const profileLinks = [
     margin: 5px var(--space-6) var(--space-4) 0;
   }
   .portrait img {
-    width: 220px;
-    height: 275px;
+    width: 300px;
+    height: 375px;
     object-fit: cover;
     /* Bias the crop upwards: in portraits the face sits above centre. */
     object-position: center 30%;
