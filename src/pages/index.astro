@@ -1,7 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Masthead from '../components/Masthead.astro';
-import Footer from '../components/Footer.astro';
 import About from '../components/About.astro';
 import PublicationsSection from '../components/PublicationsSection.astro';
 import ProjectsSection from '../components/ProjectsSection.astro';
@@ -125,6 +124,4 @@ const htmlClass = [
       return null;
     })}
   </main>
-
-  <Footer siteName={site.data.name} />
 </Layout>
