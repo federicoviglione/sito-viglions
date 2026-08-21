@@ -1,8 +1,20 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 
 const all = await getCollection('talks');
 const sorted = all.sort((a, b) => (b.data.date as Date).getTime() - (a.data.date as Date).getTime());
+
+const site = await getEntry('site', 'info');
+const bySlug = new Map(sorted.map(t => [t.slug, t]));
+
+// Editor-curated list from the CMS; unknown slugs (renamed or deleted talks) are
+// dropped, and an empty selection falls back to the three most recent talks.
+const curated = (site?.data.selected_talks ?? [])
+  .map(slug => bySlug.get(slug))
+  .filter((t): t is NonNullable<typeof t> => Boolean(t));
+const selected = curated.length > 0 ? curated : sorted.slice(0, 3);
+
+const hasMore = sorted.length > selected.length;
 
 function fmtDate(d: Date) {
   return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
@@ -10,9 +22,9 @@ function fmtDate(d: Date) {
 ---
 {sorted.length > 0 && (
   <section id="talks" class="talks page section">
-    <h2 class="section-title">Talks</h2>
+    <h2 class="section-title">Selected talks</h2>
     <div class="list">
-      {sorted.map(t => (
+      {selected.map(t => (
         <div class="talk">
           <span class="date">{fmtDate(t.data.date as Date)}</span>
           <span class="body">
@@ -20,16 +32,11 @@ function fmtDate(d: Date) {
               {t.data.url ? <a href={t.data.url} target="_blank" rel="noopener noreferrer">{t.data.title}</a> : t.data.title}
             </span>
             <span class="venue"> — {t.data.venue}{t.data.location ? `, ${t.data.location}` : ''}</span>
-            {(t.data.slides_url || t.data.video_url) && (
-              <span class="links">
-                {t.data.slides_url && <a href={t.data.slides_url} target="_blank" rel="noopener noreferrer">Slides</a>}
-                {t.data.video_url && <a href={t.data.video_url} target="_blank" rel="noopener noreferrer">Video</a>}
-              </span>
-            )}
           </span>
         </div>
       ))}
     </div>
+    {hasMore && <a class="more" href="/talks/">More talks →</a>}
   </section>
 )}
 
@@ -51,9 +58,14 @@ function fmtDate(d: Date) {
   .title a { color: var(--ink); border-bottom: 1px solid var(--rule); }
   .title a:hover { color: var(--accent); border-color: var(--accent-soft); }
   .venue { color: var(--muted); font-size: var(--fs-sm); }
-  .links { margin-left: var(--space-2); font-size: var(--fs-xs); }
-  .links a { color: var(--accent); margin-right: var(--space-2); border-bottom: 1px solid var(--accent-soft); }
-  .links a:hover { color: var(--ink); border-color: var(--ink); }
+  .more {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-size: var(--fs-sm);
+    color: var(--accent);
+    border-bottom: 1px solid var(--accent-soft);
+  }
+  .more:hover { color: var(--ink); border-color: var(--ink); }
 
   @media (max-width: 480px) {
     .talk { grid-template-columns: 1fr; gap: 2px; }

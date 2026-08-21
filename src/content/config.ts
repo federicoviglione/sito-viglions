@@ -52,6 +52,7 @@ const siteCollection = defineCollection({
       url: z.string().url().or(z.literal('')).optional(),
     })).optional(),
     peer_review_for: z.array(z.string()).optional(),
+    selected_talks: z.array(z.string()).optional(),
     theme: z.object({
       palette: z.enum(['bianca', 'bordeaux', 'blu', 'foresta', 'ambra']).default('bianca'),
       show_photo: z.boolean().default(true),

@@ -85,6 +85,16 @@ collections:
               - { label: "Role", name: role, widget: string, required: false }
               - { label: "URL", name: url, widget: string, required: false }
           - { label: "Peer review for", name: peer_review_for, widget: list, required: false, hint: "List of journals" }
+          - label: "Selected talks (homepage)"
+            name: selected_talks
+            widget: relation
+            collection: talks
+            multiple: true
+            required: false
+            search_fields: [title, venue]
+            display_fields: [title, venue]
+            value_field: "{{slug}}"
+            hint: "Talks shown on the homepage, in this order. Leave empty to show the 3 most recent. The full list is always at /talks."
           - label: "Theme settings"
             name: theme
             widget: object
