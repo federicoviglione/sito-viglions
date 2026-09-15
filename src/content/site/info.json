@@ -11,17 +11,38 @@
   "github_url": "",
   "photo": "/uploads/federico.jpg",
   "photo_credit": "",
-  "cv_pdf": "/files/cv.pdf",
+  "cv_pdf": "/uploads/CV_DR__FEDERICO_VIGLIONE.pdf",
   "project_memberships": [
-    { "name": "COSMOS: History & Philosophy of Cosmology Network", "period": "2023–present" },
-    { "name": "CHRONOS: Rethinking and Communicating Time", "period": "2020–2024" },
-    { "name": "PROTEUS: Paradoxes and Metaphors of Time in Early Universe(s) (ERC Starting Grant)", "period": "2018–2023" }
+    {
+      "name": "COSMOS: History & Philosophy of Cosmology Network",
+      "period": "2023–present",
+      "role": "",
+      "url": ""
+    },
+    {
+      "name": "CHRONOS: Rethinking and Communicating Time",
+      "period": "2020–2024",
+      "role": "",
+      "url": ""
+    },
+    {
+      "name": "PROTEUS: Paradoxes and Metaphors of Time in Early Universe(s) (ERC Starting Grant)",
+      "period": "2018–2023",
+      "role": "",
+      "url": ""
+    }
   ],
+  "selected_talks": [],
   "theme": {
     "palette": "bianca",
     "show_photo": true,
     "hero_name_size": "default",
     "hidden_sections": [],
-    "section_order": ["about", "publications", "projects", "talks"]
+    "section_order": [
+      "about",
+      "publications",
+      "projects",
+      "talks"
+    ]
   }
 }
