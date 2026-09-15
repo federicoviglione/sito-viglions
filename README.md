@@ -112,7 +112,7 @@ Send him that file when onboarding. Don't ask him to learn Markdown beyond what 
 - **Branch:** `main` → production. Push to `main` = auto-deploy.
 - **Build trigger:** GitHub webhook (Netlify GitHub App installed on the repo). Sveltia commits to GitHub on Publish, Netlify picks it up.
 - **Build time:** typically 30–60 s.
-- **Editor access:** Federico's CMS login uses **GitHub OAuth** brokered by a dedicated Cloudflare Worker (see "Auth proxy" below). To grant a new editor: add them as a **collaborator with `push` permission** on `AlbyIanna/sito-viglions`. They sign in at `/admin/` with their GitHub account and authorize the OAuth app on first login.
+- **Editor access:** Federico's CMS login uses **GitHub OAuth** brokered by a dedicated Cloudflare Worker (see "Auth proxy" below). To grant a new editor: add them as a **collaborator with `push` permission** on `federicoviglione/sito-viglions`. They sign in at `/admin/` with their GitHub account and authorize the OAuth app on first login.
 
 Cache headers (set in `netlify.toml`):
 
