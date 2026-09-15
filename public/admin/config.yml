@@ -1,7 +1,7 @@
 # SYNC: keep schema mirrored with src/content/config.ts
 backend:
   name: github
-  repo: AlbyIanna/sito-viglions
+  repo: federicoviglione/sito-viglions
   branch: main
   base_url: https://sveltia-cms-auth.alby-ianna.workers.dev
 
